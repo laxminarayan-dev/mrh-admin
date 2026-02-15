@@ -13,8 +13,8 @@ export const initialData = {
 const fetchDashboardData = async (setLoadingFun) => {
     try {
         setLoadingFun(true);
-        const res = await fetch(`${BACKEND_URL}/api/dashboard-data`, {
-            method: "POST",
+        const res = await fetch(`${BACKEND_URL}/api/shop/dashboard-data`, {
+            method: "GET",
             headers: {
                 "Content-Type": "application/json",
             },

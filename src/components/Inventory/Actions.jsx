@@ -1,32 +1,27 @@
 "use client";
-import { useState } from "react";
-import InventoryUpdateModel from "./UpdateModel";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
 const Actions = ({ data }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
   return (
     <>
       <div className="flex flex-row justify-between items-center mt-2 gap-2">
-        <button
+        <Button
           aria-label="updateEntry"
-          className="font-semibold font-mono bg-amber-400 text-gray-900 p-1 flex-1 rounded-full cursor-pointer"
+          className="font-semibold font-mono bg-amber-400 text-gray-900 cursor-pointer hover:bg-amber-500 transition-colors"
           onClick={() => {
-            setIsModalOpen(true);
+            router.push(`/inventory/edit?editId=${data._id || data.id}`);
           }}
         >
           Edit
-        </button>
-        <button
-          className="font-semibold font-mono bg-red-400 text-gray-900 p-1 flex-1 rounded-full cursor-pointer"
+        </Button>
+        <Button
+          className="font-semibold font-mono bg-red-400 text-gray-900  cursor-pointer hover:bg-red-500 transition-colors"
           aria-label="deleteEntry"
         >
           Remove
-        </button>
+        </Button>
       </div>
-      <InventoryUpdateModel
-        updateModalVisible={isModalOpen}
-        setUpdateModalVisible={setIsModalOpen}
-        updateDataPayload={data}
-      />
     </>
   );
 };

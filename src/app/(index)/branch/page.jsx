@@ -1,7 +1,9 @@
+import BranchManager from "../../../components/Branch/BranchManager";
+
 const CreateNewBranchPage = () => {
   return (
     <div className="p-4 bg-white rounded-lg">
-      <h1 className="text-2xl font-bold mb-4">Create New Branch</h1>
+      {/* <h1 className="text-2xl font-bold mb-4">Create New Branch</h1>
       <form className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">
@@ -39,7 +41,10 @@ const CreateNewBranchPage = () => {
         >
           Create Branch
         </button>
-      </form>
+      </form> */}
+      {/* Manage Branches */}
+      <h1 className="text-2xl font-semibold mb-4">Manage Your Branch</h1>
+      <BranchManager />
     </div>
   );
 };

@@ -1,97 +1,164 @@
+"use client";
+
 import Header from "@/components/Inventory/Header";
 import Actions from "@/components/Inventory/Actions";
-import { IndianRupee } from "lucide-react";
+import { IndianRupee, Clock } from "lucide-react";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
 
 const InventoryManagement = () => {
-  const foodItems = [
-    {
-      id: "1",
-      foodName: "Margherita Pizza",
-      foodImageUrl: "/foodImages/margherita.jpg",
-      foodDescription:
-        "Classic pizza topped with fresh tomatoes, mozzarella, and basil.",
-      foodPrice: 299,
-      foodAvailability: true,
-    },
-    {
-      id: "2",
-      foodName: "Veg Biryani",
-      foodImageUrl: "/foodImages/veg-biryani.jpg",
-      foodDescription:
-        "Aromatic basmati rice cooked with mixed vegetables and Indian spices.",
-      foodPrice: 249,
-      foodAvailability: true,
-    },
-    {
-      id: "3",
-      foodName: "Paneer Butter Masala",
-      foodImageUrl: "/foodImages/paneer-butter-masala.jpg",
-      foodDescription:
-        "Soft paneer cubes cooked in rich, creamy butter masala gravy.",
-      foodPrice: 220,
-      foodAvailability: true,
-    },
-    {
-      id: "4",
-      foodName: "Masala Dosa",
-      foodImageUrl: "/foodImages/dosa.jpg",
-      foodDescription:
-        "Crispy dosa filled with spiced mashed potatoes served with chutney and sambar.",
-      foodPrice: 120,
-      foodAvailability: true,
-    },
-    {
-      id: "5",
-      foodName: "Chole Bhature",
-      foodImageUrl: "/foodImages/chole-bhature.jpg",
-      foodDescription:
-        "Spicy chickpea curry served with deep-fried fluffy bhature.",
-      foodPrice: 150,
-      foodAvailability: false, // maybe out of stock
-    },
-    {
-      id: "6",
-      foodName: "Chocolate Brownie",
-      foodImageUrl: "/foodImages/chocolate-brownie.jpg",
-      foodDescription: "Rich and fudgy chocolate brownie served warm.",
-      foodPrice: 90,
-      foodAvailability: true,
-    },
-  ];
+  const [foodItems, setFoodItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFoodItems = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/items`,
+        );
+        const data = await response.json();
+        console.log("Fetched food items:", data);
+        setFoodItems(Array.isArray(data) ? data : data.items || []);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFoodItems();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-10 text-center text-slate-500">
+        Loading Inventory...
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-8 p-6 bg-transparent min-h-screen">
       <Header />
-      {/* Card Group */}
-      <div className=" grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {/* card */}
-        {foodItems.map((item, index) => (
+
+      {/* Clay Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        {foodItems.map((item) => (
           <div
-            key={index}
-            className="border border-gray-100 bg-white shadow-sm rounded-md overflow-hidden"
+            key={item._id || item.id}
+            className="
+              group
+              rounded-2xl
+              bg-gradient-to-br from-white to-slate-100
+              shadow-[8px_8px_16px_rgba(0,0,0,0.08),-8px_-8px_16px_rgba(255,255,255,0.9)]
+              hover:shadow-[12px_12px_20px_rgba(0,0,0,0.12),-12px_-12px_20px_rgba(255,255,255,1)]
+              transition-all duration-300
+              hover:-translate-y-1
+              overflow-hidden
+            "
           >
-            <div className="relative w-full h-52 md:h-64">
-              {/* image */}
+            {/* Image */}
+            <div className="overflow-hidden h-40 rounded-t-2xl flex justify-center items-center ">
               <Image
-                src={item.foodImageUrl}
-                alt="Image"
-                fill // Next.js will use the parent div’s size
-                sizes="(max-width: 768px) 100vw, 50vw"
-                style={{ objectFit: "cover" }}
-                priority
+                src={
+                  `${process.env.NEXT_PUBLIC_BACKEND_URL}${item.images?.url}` ||
+                  "https://placehold.co/400x400/png?text=No+Image"
+                }
+                alt={item.images?.alt || item.name}
+                width={200}
+                height={200}
+                loading="eager"
               />
+
+              {/* Clay badges */}
+              <div className="absolute top-3 left-3 flex flex-col gap-2">
+                {item.isNewArrival && <ClayBadge color="blue">New</ClayBadge>}
+                {item.isBestSeller && (
+                  <ClayBadge color="amber">Best Seller</ClayBadge>
+                )}
+              </div>
+
+              <div className="absolute top-3 right-3">
+                <ClayBadge color={item.isAvailable ? "green" : "red"}>
+                  {item.isAvailable ? "Available" : "Out of Stock"}
+                </ClayBadge>
+              </div>
             </div>
-            <div className="p-4 flex flex-col gap-1">
-              {/* bottom */}
-              <h1 className="font-semibold text-lg">{item.foodName}</h1>
-              <h2 className="text-gray-700 line-clamp-2">
-                {item.foodDescription}
-              </h2>
-              <h3 className="flex justify-start items-center text-2xl font-bold">
-                <IndianRupee size={16} /> {item.foodPrice}
-              </h3>
-              <Actions data={item} />
+
+            {/* Content */}
+            <div className="p-5 flex flex-col gap-4">
+              {/* Title */}
+              <div className="flex justify-between items-start">
+                <h2 className="font-semibold text-slate-800 text-lg line-clamp-1">
+                  {item.name}
+                </h2>
+
+                <div
+                  className="
+                  px-2 py-1
+                  text-[10px]
+                  rounded-lg
+                  bg-slate-100
+                  shadow-inner
+                  capitalize
+                "
+                >
+                  {item.category}
+                </div>
+              </div>
+
+              {/* Description */}
+              <p className="text-sm text-slate-500 line-clamp-2 min-h-[40px]">
+                {item.description}
+              </p>
+
+              {/* Meta */}
+              <div className="flex items-center gap-4 text-xs text-slate-400">
+                <div className="flex items-center gap-1">
+                  <Clock size={14} />
+                  {item.preparationTime} mins
+                </div>
+
+                {item.stock !== null && (
+                  <div
+                    className={`
+                      px-2 py-0.5 rounded-md shadow-inner
+                      ${
+                        item.stock <= item.lowStockThreshold
+                          ? "bg-red-100 text-red-500"
+                          : "bg-slate-100"
+                      }
+                    `}
+                  >
+                    Stock: {item.stock}
+                  </div>
+                )}
+              </div>
+
+              {/* Price + Actions */}
+              <div className="flex justify-between items-center mt-2">
+                <div className="flex flex-col">
+                  {item.discountPrice && (
+                    <span className="text-xs text-slate-400 line-through">
+                      ₹{item.originalPrice}
+                    </span>
+                  )}
+
+                  <div
+                    className="
+                    flex items-center
+                    font-bold
+                    text-xl
+                    text-slate-800
+                  "
+                  >
+                    <IndianRupee size={18} />
+                    {item.discountPrice || item.originalPrice}
+                  </div>
+                </div>
+
+                <Actions data={item} />
+              </div>
             </div>
           </div>
         ))}
@@ -99,4 +166,48 @@ const InventoryManagement = () => {
     </div>
   );
 };
+
 export default InventoryManagement;
+
+const ClayBadge = ({ children, color = "gray" }) => {
+  const colors = {
+    green: `
+      bg-gradient-to-br from-green-200 to-green-300
+      text-green-800
+      shadow-[inset_2px_2px_4px_rgba(255,255,255,0.6),inset_-2px_-2px_4px_rgba(0,0,0,0.08)]
+    `,
+    red: `
+      bg-gradient-to-br from-red-200 to-red-300
+      text-red-800
+      shadow-[inset_2px_2px_4px_rgba(255,255,255,0.6),inset_-2px_-2px_4px_rgba(0,0,0,0.08)]
+    `,
+    amber: `
+      bg-gradient-to-br from-amber-200 to-amber-300
+      text-amber-900
+      shadow-[inset_2px_2px_4px_rgba(255,255,255,0.6),inset_-2px_-2px_4px_rgba(0,0,0,0.08)]
+    `,
+    blue: `
+      bg-gradient-to-br from-blue-200 to-blue-300
+      text-blue-800
+      shadow-[inset_2px_2px_4px_rgba(255,255,255,0.6),inset_-2px_-2px_4px_rgba(0,0,0,0.08)]
+    `,
+    gray: `
+      bg-gradient-to-br from-slate-200 to-slate-300
+      text-slate-700
+      shadow-[inset_2px_2px_4px_rgba(255,255,255,0.6),inset_-2px_-2px_4px_rgba(0,0,0,0.08)]
+    `,
+  };
+
+  return (
+    <div
+      className={`
+        px-3 py-1
+        text-xs font-semibold
+        rounded-full
+        ${colors[color]}
+      `}
+    >
+      {children}
+    </div>
+  );
+};

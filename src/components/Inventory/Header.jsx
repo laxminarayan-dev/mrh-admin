@@ -2,9 +2,11 @@
 import InventoryAddModel from "./AddModel";
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <>
@@ -22,7 +24,7 @@ const Header = () => {
         <h1 className="text-2xl font-bold">Products</h1>
         <button
           onClick={() => {
-            setIsModalOpen(true);
+            router.push("/inventory/add");
           }}
           className="border border-gray-100 bg-white shadow-sm py-2 px-4 rounded-full cursor-pointer flex justify-center items-center gap-1"
         >

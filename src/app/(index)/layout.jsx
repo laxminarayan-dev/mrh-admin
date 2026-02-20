@@ -11,9 +11,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <div className="bg-white text-slate-900 ">
-          <div className="flex-1 flex flex-col max-h-screen overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
             <Navbar />
-            <div className="overflow-y-auto min-h-screen">
+            <div className="flex-1 overflow-hidden mt-20">
               <div className="ml-0 md:ml-64 p-4 bg-white">{children}</div>
             </div>
           </div>

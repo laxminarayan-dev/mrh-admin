@@ -10,7 +10,7 @@ const Header = () => {
 
   return (
     <>
-      <div>
+      <div className="">
         <h1 className="text-3xl my-2 text-gray-800 font-bold">
           Inventory Management
         </h1>

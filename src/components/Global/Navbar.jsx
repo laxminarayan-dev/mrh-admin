@@ -227,8 +227,8 @@ const Navbar = () => {
   ];
   return (
     <>
-      <nav className="fixed top-0 left-0 w-full z-[101] bg-white/85 backdrop-blur-md border-b border-slate-200/70 min-h-16 max-h-16">
-        <div className="px-4 sm:px-6 py-3 mx-auto flex items-center justify-between bg-white">
+      <nav className="fixed top-0 left-0 w-full z-[101] bg-white/85 backdrop-blur-md  min-h-16 max-h-16 border-b-2 border-slate-400">
+        <div className="px-4 sm:px-6 py-3 mx-auto flex items-center justify-between bg-white border-b border-slate-200 shadow-sm">
           {/* Left */}
           <div className="flex items-center gap-3">
             <span

@@ -2,7 +2,7 @@
 
 import Header from "@/components/Inventory/Header";
 import Actions from "@/components/Inventory/Actions";
-import { IndianRupee, Clock, Bug } from "lucide-react";
+import { IndianRupee, Clock, Bug, Loader } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { CheckCircle2Icon } from "lucide-react";
@@ -37,8 +37,8 @@ const InventoryManagement = () => {
 
   if (loading) {
     return (
-      <div className="p-10 text-center text-slate-500">
-        Loading Inventory...
+      <div className="p-10 text-center text-slate-500 min-h-screen flex justify-center items-center">
+        <Loader className="mx-auto mb-4 animate-spin" size={24} />
       </div>
     );
   }
@@ -76,9 +76,11 @@ const InventoryManagement = () => {
             <div
               key={item._id || item.id}
               className="
+              relative
               group
               rounded-2xl
               bg-gradient-to-br from-white to-slate-100
+              border border-slate-200/90
               shadow-[8px_8px_16px_rgba(0,0,0,0.08),-8px_-8px_16px_rgba(255,255,255,0.9)]
               hover:shadow-[12px_12px_20px_rgba(0,0,0,0.12),-12px_-12px_20px_rgba(255,255,255,1)]
               transition-all duration-300
@@ -87,21 +89,21 @@ const InventoryManagement = () => {
             "
             >
               {/* Image */}
-              <div className="overflow-hidden h-40 rounded-t-2xl flex justify-center items-center ">
+              <div className="overflow-hidden h-42  flex justify-center items-center ">
                 <Image
                   src={
                     `${process.env.NEXT_PUBLIC_BACKEND_URL}${item.images?.url}` ||
                     "https://placehold.co/400x400/png?text=No+Image"
                   }
                   alt={item.images?.alt || item.name}
-                  width={200}
-                  height={200}
+                  width={160}
+                  height={160}
                   loading="eager"
                   unoptimized
                 />
 
                 {/* Clay badges */}
-                <div className="absolute top-3 left-3 flex flex-col gap-2">
+                <div className=" absolute top-3 left-3 flex flex-col gap-2">
                   {item.isNewArrival && <ClayBadge color="blue">New</ClayBadge>}
                   {item.isBestSeller && (
                     <ClayBadge color="amber">Best Seller</ClayBadge>
@@ -116,7 +118,7 @@ const InventoryManagement = () => {
               </div>
 
               {/* Content */}
-              <div className="p-5 flex flex-col gap-4">
+              <div className="p-5 flex flex-col gap-1">
                 {/* Title */}
                 <div className="flex justify-between items-start">
                   <h2 className="font-semibold text-slate-800 text-lg line-clamp-1">
@@ -138,7 +140,7 @@ const InventoryManagement = () => {
                 </div>
 
                 {/* Description */}
-                <p className="text-sm text-slate-500 line-clamp-2 min-h-[40px]">
+                <p className="text-xs text-slate-500 line-clamp-2 min-h-[40px]">
                   {item.description}
                 </p>
 
@@ -166,7 +168,7 @@ const InventoryManagement = () => {
                 </div>
 
                 {/* Price + Actions */}
-                <div className="flex justify-between items-center mt-2">
+                <div className="flex justify-between items-center">
                   <div className="flex flex-col">
                     {item.discountPrice && (
                       <span className="text-xs text-slate-400 line-through">
@@ -240,6 +242,7 @@ const ClayBadge = ({ children, color = "gray" }) => {
         px-3 py-1
         text-xs font-semibold
         rounded-full
+        z-99
         ${colors[color]}
       `}
     >

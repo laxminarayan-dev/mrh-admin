@@ -49,9 +49,13 @@ const CreateNewBranchPage = () => {
   }, []);
 
   useEffect(() => {
-    const active = branches.find((b) => b._id === selectedBranchId);
-    if (active) setSelectedBranch(active);
-
+    if (Array.isArray(branches) && branches.length > 0) {
+      if (!selectedBranchId) {
+        setSelectedBranchId(branches[0]._id);
+      }
+      const active = branches.find((b) => b._id === selectedBranchId);
+      if (active) setSelectedBranch(active);
+    }
     console.log("Branches:", branches);
   }, [branches, selectedBranchId]);
 

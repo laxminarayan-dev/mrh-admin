@@ -51,6 +51,8 @@ const CreateNewBranchPage = () => {
   useEffect(() => {
     const active = branches.find((b) => b._id === selectedBranchId);
     if (active) setSelectedBranch(active);
+
+    console.log("Branches:", branches);
   }, [branches, selectedBranchId]);
 
   useEffect(() => {

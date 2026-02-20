@@ -6,12 +6,7 @@ import { IndianRupee, Clock, Bug } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { CheckCircle2Icon } from "lucide-react";
-import {
-  Alert,
-  // AlertAction,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const InventoryManagement = () => {
   const [foodItems, setFoodItems] = useState([]);

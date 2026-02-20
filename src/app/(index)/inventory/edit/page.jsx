@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { Plus, X, Loader2, ImageIcon, Upload, Save } from "lucide-react";
+import { X, Loader2, Upload, Save, CheckCircle2Icon, Ban } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 // shadcn/ui components
 import {
   Card,
@@ -26,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+
 import Image from "next/image";
 
 const EditMenuItem = ({ initialData = null }) => {
@@ -33,11 +34,14 @@ const EditMenuItem = ({ initialData = null }) => {
   const searchParams = useSearchParams();
   const editId = searchParams?.get("editId");
   const fileInputRef = useRef(null);
-
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingItem, setLoadingItem] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [previewUrl, setPreviewUrl] = useState(initialData?.imageUrl || "");
+  const [file, setFile] = useState(null);
   const isEditMode = Boolean(editId || initialData);
 
   // 1. Unified Form State
@@ -69,7 +73,23 @@ const EditMenuItem = ({ initialData = null }) => {
       // In a real app, you'd upload this to S3/Cloudinary and get a URL
       const objectUrl = URL.createObjectURL(file);
       setPreviewUrl(objectUrl);
+      setFile(file);
     }
+  };
+
+  // 3. Image Source Logic
+  const getImageSrc = () => {
+    if (!previewUrl) return "";
+
+    // blob URL (from file upload preview)
+    if (previewUrl.startsWith("blob:")) return previewUrl;
+
+    // already full URL
+    if (previewUrl.startsWith("http://") || previewUrl.startsWith("https://"))
+      return previewUrl;
+
+    // relative URL from backend
+    return `${process.env.NEXT_PUBLIC_BACKEND_URL}${previewUrl}`;
   };
 
   // Fetch item when editId is present
@@ -185,6 +205,31 @@ const EditMenuItem = ({ initialData = null }) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // sanitize price input: allow digits and one optional dot, max 2 decimals
+  const handlePriceChange = (field, value) => {
+    if (typeof value !== "string") value = String(value || "");
+    // remove any char that's not digit or dot
+    let sanitized = value.replace(/[^0-9.]/g, "");
+    // keep only first dot
+    const parts = sanitized.split(".");
+    if (parts.length > 1) {
+      sanitized = parts.shift() + "." + parts.join("");
+    }
+    // limit decimals to 2
+    if (sanitized.includes(".")) {
+      const [intPart, decPart] = sanitized.split(".");
+      sanitized = intPart + "." + (decPart || "").slice(0, 2);
+    }
+    setFormData((prev) => ({ ...prev, [field]: sanitized }));
+  };
+
+  // sanitize integer input: remove non-digits
+  const handleIntegerChange = (field, value) => {
+    if (typeof value !== "string") value = String(value || "");
+    const sanitized = value.replace(/\D/g, "");
+    setFormData((prev) => ({ ...prev, [field]: sanitized }));
+  };
+
   const handleCheckboxChange = (group, item) => {
     console.log("Checkbox change:", group, item);
     const currentItems = formData[group];
@@ -216,16 +261,50 @@ const EditMenuItem = ({ initialData = null }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // setLoading(true);
+    setLoading(true);
 
-    // // Simulate API logic
-    console.log("Submitting Data:", formData);
+    try {
+      const form = new FormData();
+      Object.entries(formData).forEach(([key, val]) => {
+        if (val === undefined || val === null) return;
+        if (Array.isArray(val) || typeof val === "object") {
+          form.append(key, JSON.stringify(val));
+        } else {
+          form.append(key, String(val));
+        }
+      });
 
-    // setTimeout(() => {
-    //   setLoading(false);
-    //   alert(isEditMode ? "Item updated!" : "Item created!");
-    //   router.push("/menu"); // Redirect after success
-    // }, 1500);
+      if (formData.altText) form.append("imageAlt", formData.altText);
+      if (file) form.append("image", file);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/items/update/${editId || "new"}`,
+        {
+          method: "PUT",
+          body: form,
+        },
+      );
+
+      const data = await res.json();
+      console.log("API response:", data);
+      if (res.ok) {
+        setShowSuccess(true);
+        // update preview if backend returned an image url
+        if (data?.item?.images?.url) setPreviewUrl(data.item.images.url);
+        router.push("/inventory");
+      } else {
+        setShowError(true);
+        setErrorMessage(
+          data?.message || "An error occurred. Please try again.",
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      setShowError(true);
+      setErrorMessage("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const daysOfWeek = [
@@ -241,6 +320,28 @@ const EditMenuItem = ({ initialData = null }) => {
 
   return (
     <div className="min-h-screen bg-slate-50/50 py-10 px-4">
+      {showSuccess && (
+        <div className="fixed top-10 z-99999 right-10 bg-green-200 rounded-lg shadow-md p-1">
+          <Alert variant="success">
+            <CheckCircle2Icon />
+            <AlertTitle>Item Updated successfully</AlertTitle>
+            <AlertDescription>
+              Item has been updated successfully.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+      {showError && (
+        <div className="min-w-92 max-w-96 fixed top-10 z-99999 right-10 bg-red-200 rounded-lg shadow-md p-1">
+          <Alert variant="destructive" className="bg-transparent border-0">
+            <Ban />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {errorMessage || "Failed to update item. Please try again later."}
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
       <div className="max-w-[900px] mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -410,10 +511,12 @@ const EditMenuItem = ({ initialData = null }) => {
                 <div className="grid gap-2">
                   <Label>Original Price (₹) *</Label>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^\\d*(\\.\\d{0,2})?$"
                     value={formData.originalPrice}
                     onChange={(e) =>
-                      handleInputChange("originalPrice", e.target.value)
+                      handlePriceChange("originalPrice", e.target.value)
                     }
                     required
                   />
@@ -421,10 +524,12 @@ const EditMenuItem = ({ initialData = null }) => {
                 <div className="grid gap-2">
                   <Label>Discount Price (₹)</Label>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^\\d*(\\.\\d{0,2})?$"
                     value={formData.discountPrice}
                     onChange={(e) =>
-                      handleInputChange("discountPrice", e.target.value)
+                      handlePriceChange("discountPrice", e.target.value)
                     }
                   />
                 </div>
@@ -462,10 +567,12 @@ const EditMenuItem = ({ initialData = null }) => {
                 <div className="grid gap-2">
                   <Label>Preparation Time (mins)</Label>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="^\\d*$"
                     value={formData.preparationTime}
                     onChange={(e) =>
-                      handleInputChange("preparationTime", e.target.value)
+                      handleIntegerChange("preparationTime", e.target.value)
                     }
                   />
                 </div>
@@ -513,8 +620,8 @@ const EditMenuItem = ({ initialData = null }) => {
                 >
                   {previewUrl ? (
                     <Image
-                      src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${previewUrl}`}
-                      alt={`${process.env.NEXT_PUBLIC_BACKEND_URL}${previewUrl}`}
+                      src={getImageSrc()}
+                      alt="Item image"
                       width={200}
                       height={200}
                       className="object-cover"

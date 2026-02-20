@@ -1,16 +1,11 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import { Plus, X, Loader2, ImageIcon, Upload, Save } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { X, Loader2, Upload, Save, CheckCircle2Icon, Ban } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // shadcn/ui components
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +31,9 @@ const AddEditMenuItem = ({ initialData = null }) => {
   const [tagInput, setTagInput] = useState("");
   const [previewUrl, setPreviewUrl] = useState(initialData?.imageUrl || "");
   const [file, setFile] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const isEditMode = !!initialData;
 
   // 1. Unified Form State
@@ -75,6 +73,31 @@ const AddEditMenuItem = ({ initialData = null }) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // sanitize price input: allow digits and one optional dot, max 2 decimals
+  const handlePriceChange = (field, value) => {
+    if (typeof value !== "string") value = String(value || "");
+    // remove any char that's not digit or dot
+    let sanitized = value.replace(/[^0-9.]/g, "");
+    // keep only first dot
+    const parts = sanitized.split(".");
+    if (parts.length > 1) {
+      sanitized = parts.shift() + "." + parts.join("");
+    }
+    // limit decimals to 2
+    if (sanitized.includes(".")) {
+      const [intPart, decPart] = sanitized.split(".");
+      sanitized = intPart + "." + (decPart || "").slice(0, 2);
+    }
+    setFormData((prev) => ({ ...prev, [field]: sanitized }));
+  };
+
+  // sanitize integer input: remove non-digits
+  const handleIntegerChange = (field, value) => {
+    if (typeof value !== "string") value = String(value || "");
+    const sanitized = value.replace(/\D/g, "");
+    setFormData((prev) => ({ ...prev, [field]: sanitized }));
+  };
+
   const handleCheckboxChange = (group, item) => {
     const currentItems = formData[group];
     const newItems = currentItems.includes(item)
@@ -104,6 +127,42 @@ const AddEditMenuItem = ({ initialData = null }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Client-side validation
+    const validateForm = () => {
+      if (!formData.name || !formData.name.trim())
+        return { ok: false, message: "Item name is required." };
+      if (!formData.category)
+        return { ok: false, message: "Category is required." };
+      if (!formData.cuisine)
+        return { ok: false, message: "Cuisine is required." };
+      if (!formData.originalPrice || Number(formData.originalPrice) <= 0)
+        return { ok: false, message: "Original price must be greater than 0." };
+      if (
+        formData.discountPrice &&
+        Number(formData.discountPrice) > Number(formData.originalPrice)
+      )
+        return {
+          ok: false,
+          message: "Discount price cannot exceed original price.",
+        };
+      if (file) {
+        const maxBytes = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxBytes)
+          return { ok: false, message: "Image must be 5MB or smaller." };
+        if (!file.type || !file.type.startsWith("image/"))
+          return { ok: false, message: "Only image files are allowed." };
+      }
+      return { ok: true };
+    };
+
+    const validation = validateForm();
+    if (!validation.ok) {
+      setErrorMessage(validation.message);
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -127,11 +186,6 @@ const AddEditMenuItem = ({ initialData = null }) => {
         form.append("image", file);
       }
 
-      console.log("Submitting form with data:");
-      for (let pair of form.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/items/add`,
         {
@@ -146,20 +200,16 @@ const AddEditMenuItem = ({ initialData = null }) => {
       }
 
       const data = await res.json();
-      alert(data.message || "Item saved");
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000); // Auto-hide success message
       router.back(); // Redirect after success
     } catch (err) {
-      console.error(err);
-      alert(err.message || "Upload failed");
+      setErrorMessage(err.message);
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000); // Auto-hide error message
     } finally {
       setLoading(false);
     }
-
-    // setTimeout(() => {
-    //   setLoading(false);
-    //   alert(isEditMode ? "Item updated!" : "Item created!");
-    //   router.push("/menu"); // Redirect after success
-    // }, 1500);
   };
 
   const daysOfWeek = [
@@ -175,6 +225,28 @@ const AddEditMenuItem = ({ initialData = null }) => {
 
   return (
     <div className="min-h-screen bg-slate-50/50 py-10 px-4">
+      {showSuccess && (
+        <div className="fixed top-10 z-99999 right-10 bg-green-200 rounded-lg shadow-md p-1">
+          <Alert variant="success">
+            <CheckCircle2Icon />
+            <AlertTitle>Item saved successfully</AlertTitle>
+            <AlertDescription>
+              Item has been saved successfully.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+      {showError && (
+        <div className="min-w-92 max-w-96 fixed top-10 z-99999 right-10 bg-red-200 rounded-lg shadow-md p-1">
+          <Alert variant="destructive" className="bg-transparent border-0">
+            <Ban />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {errorMessage || "Failed to save item. Please try again later."}
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
       <div className="max-w-[900px] mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -241,7 +313,6 @@ const AddEditMenuItem = ({ initialData = null }) => {
                   }
                   placeholder="Briefly describe the ingredients and taste..."
                   className="h-24"
-                  required
                   maxLength={500}
                 />
                 <p className="text-xs text-right text-slate-400">
@@ -344,10 +415,12 @@ const AddEditMenuItem = ({ initialData = null }) => {
                 <div className="grid gap-2">
                   <Label>Original Price (₹) *</Label>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^\\d*(\\.\\d{0,2})?$"
                     value={formData.originalPrice}
                     onChange={(e) =>
-                      handleInputChange("originalPrice", e.target.value)
+                      handlePriceChange("originalPrice", e.target.value)
                     }
                     required
                   />
@@ -355,10 +428,12 @@ const AddEditMenuItem = ({ initialData = null }) => {
                 <div className="grid gap-2">
                   <Label>Discount Price (₹)</Label>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^\\d*(\\.\\d{0,2})?$"
                     value={formData.discountPrice}
                     onChange={(e) =>
-                      handleInputChange("discountPrice", e.target.value)
+                      handlePriceChange("discountPrice", e.target.value)
                     }
                   />
                 </div>
@@ -396,10 +471,12 @@ const AddEditMenuItem = ({ initialData = null }) => {
                 <div className="grid gap-2">
                   <Label>Preparation Time (mins)</Label>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="^\\d*$"
                     value={formData.preparationTime}
                     onChange={(e) =>
-                      handleInputChange("preparationTime", e.target.value)
+                      handleIntegerChange("preparationTime", e.target.value)
                     }
                   />
                 </div>

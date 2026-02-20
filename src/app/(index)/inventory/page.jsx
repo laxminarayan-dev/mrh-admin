@@ -8,6 +8,20 @@ import { useState, useEffect } from "react";
 import { CheckCircle2Icon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+export const fetchFoodItems = async (setItems, setLoading = () => {}) => {
+  try {
+    setLoading(true);
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/items`,
+    );
+    const data = await response.json();
+    setItems(Array.isArray(data) ? data : data.items || []);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
 const InventoryManagement = () => {
   const [foodItems, setFoodItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,24 +29,7 @@ const InventoryManagement = () => {
   const [showError, setShowError] = useState(false);
 
   useEffect(() => {
-    const fetchFoodItems = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/items`,
-        );
-        const data = await response.json();
-        console.log("Fetched food items:", data);
-        console.log(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}${data[10]?.images?.url}`,
-        );
-        setFoodItems(Array.isArray(data) ? data : data.items || []);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFoodItems();
+    fetchFoodItems(setFoodItems, setLoading);
   }, []);
 
   if (loading) {

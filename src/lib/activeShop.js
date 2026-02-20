@@ -16,12 +16,17 @@ export const setActiveShopId = (shopId) => {
             window.localStorage.removeItem(STORAGE_KEY);
         } else {
             window.localStorage.setItem(STORAGE_KEY, shopId);
+            window.dispatchEvent(
+                new CustomEvent("activeShopChanged", { detail: shopId })
+            );
         }
         window.dispatchEvent(
             new CustomEvent("mrh:activeShopChanged", { detail: { shopId } })
         );
-    } catch {
+    } catch (err) {
         // ignore
+        console.log("Error setting active shop ID:", err);
+
     }
 };
 

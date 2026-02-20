@@ -2,10 +2,14 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Hide Leaflet Routing Machine UI */
+.leaflet-routing-container {
+  display: none !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
-
   /* Modern color palette */
   --primary: oklch(0.205 0 0);
   --primary-light: #60a5fa;

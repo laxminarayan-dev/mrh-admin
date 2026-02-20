@@ -266,15 +266,15 @@ const Navbar = () => {
                       <p className="text-sm font-semibold text-gray-900 leading-tight">
                         {getShopLabel(activeShop)}
                       </p>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 mt-2">
                         {status.label ? (
                           <span
-                            className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${status.className}`}
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${status.className}`}
                           >
                             {status.label}
                           </span>
                         ) : (
-                          <span className="text-[11px] font-medium text-gray-500">
+                          <span className="text-[10px] font-medium text-gray-500">
                             Choose branch
                           </span>
                         )}
@@ -324,24 +324,23 @@ const Navbar = () => {
                             onClick={() => {
                               setActiveShopId(shop._id);
                               setIsBranchMenuOpen(false);
-                              router.refresh?.();
                             }}
                             className={`w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors ${isActive ? "bg-slate-50" : ""}`}
                           >
                             <div className="min-w-0">
-                              <p className="text-sm font-semibold text-gray-900 truncate">
+                              <p className="text-sm font-bold text-gray-900 truncate">
                                 {getShopLabel(shop)}
                               </p>
                               <div className="flex items-center gap-2 mt-1">
                                 {status.label && (
                                   <span
-                                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${status.className}`}
+                                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${status.className}`}
                                   >
                                     {status.label}
                                   </span>
                                 )}
                                 {shop.code && (
-                                  <span className="text-[11px] font-medium text-gray-500">
+                                  <span className="text-[12px] font-medium text-gray-500">
                                     {shop.code}
                                   </span>
                                 )}
@@ -366,7 +365,7 @@ const Navbar = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        router.push("/branch");
+                        router.push("/branch/add");
                         setIsBranchMenuOpen(false);
                       }}
                       className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/70 bg-white hover:bg-slate-50 px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm shadow-black/5 transition-colors"

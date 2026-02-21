@@ -13,10 +13,13 @@ const getSocket = () => {
 
     if (!window.__MRH_SOCKET) {
         const s = io(SOCKET_URL, {
-            // keep defaults; customize transports/reconnection here if needed
+            path: "/mrh-backend/socket.io",
             reconnection: true,
             reconnectionAttempts: Infinity,
             reconnectionDelay: 1000,
+            transports: ['websocket', 'polling'],
+            timeout: 20000,
+            forceNew: true
         });
 
         s.on("connect", () => {

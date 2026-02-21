@@ -21,8 +21,10 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { fetchShops } from "@/store/shopAPI";
+import { fetchShops, updateShop } from "@/store/shopAPI";
 import { fetchFoodItems } from "../inventory/page";
+import Socket from "@/components/Socket/socket";
+import { useRouter } from "next/navigation";
 
 const CreateNewBranchPage = () => {
   const [branches, setBranches] = useState([]);
@@ -30,6 +32,22 @@ const CreateNewBranchPage = () => {
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  // socket connection status logging
+  useEffect(() => {
+    if (Socket.connected) {
+      console.log("Already connected to Socket.IO server");
+    } else {
+      Socket.on("connect", () => {
+        console.log("Connected to Socket.IO server");
+      });
+    }
+
+    Socket.on("disconnect", () => {
+      console.log("Disconnected from Socket.IO server");
+    });
+  }, []);
 
   /* ---------------- INIT ---------------- */
 
@@ -56,7 +74,6 @@ const CreateNewBranchPage = () => {
       const active = branches.find((b) => b._id === selectedBranchId);
       if (active) setSelectedBranch(active);
     }
-    console.log("Branches:", branches);
   }, [branches, selectedBranchId]);
 
   useEffect(() => {
@@ -226,7 +243,13 @@ const CreateNewBranchPage = () => {
             Reset
           </Button>
 
-          <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200">
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
+            onClick={() => {
+              router.refresh();
+              updateShop(selectedBranch._id, { ...selectedBranch });
+            }}
+          >
             <Save size={16} className="mr-2" />
             Save Changes
           </Button>

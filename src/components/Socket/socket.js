@@ -5,7 +5,7 @@ import { io } from "socket.io-client";
 
 // Connect to your external Socket.IO server (e.g., hosted on Heroku, a custom server, etc.)
 // Replace 'http://localhost:4000' with your actual server URL.
-const SOCKET_URL = "http://localhost:8000";
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:8000";
 
 // Create a single socket instance and attach to window to survive HMR / fast-refresh
 const getSocket = () => {

@@ -22,7 +22,7 @@ const Home = () => {
 
   useEffect(() => {
     if (Socket.connected) {
-      console.log("Already connected to Socket.IO server");
+      return;
     } else {
       Socket.on("connect", () => {
         console.log("Connected to Socket.IO server");
@@ -52,11 +52,10 @@ const Home = () => {
           {/* <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-purple-100/20"></div> */}
 
           <div
-            className={`relative z-10 w-full flex-col scroll-smooth justify-center items-center flex-1 px-4 sm:px-6 lg:px-8 py-8 transition-all duration-1000 ease-out ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-8"
-            }`}
+            className={`relative z-10 w-full flex-col scroll-smooth justify-center items-center flex-1 px-4 sm:px-6 lg:px-8 py-8 transition-all duration-1000 ease-out ${isVisible
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-8"
+              }`}
           >
             {/* Modern header section */}
             <div className="text-center mb-12 max-w-4xl mx-auto">
@@ -89,21 +88,19 @@ const Home = () => {
 
             {/* Content sections with staggered animations */}
             <div
-              className={`transition-all duration-700 delay-200 ease-out ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-8"
-              }`}
+              className={`transition-all duration-700 delay-200 ease-out ${isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-8"
+                }`}
             >
               <KPIBoxGroup kpiData={data.kpiData} />
             </div>
 
             <div
-              className={`transition-all duration-700 delay-400 ease-out ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-8"
-              }`}
+              className={`transition-all duration-700 delay-400 ease-out ${isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-8"
+                }`}
             >
               <ChartGroup chartData={data.chartData} />
             </div>

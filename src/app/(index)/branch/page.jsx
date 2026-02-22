@@ -37,7 +37,7 @@ const CreateNewBranchPage = () => {
   // socket connection status logging
   useEffect(() => {
     if (Socket.connected) {
-      console.log("Already connected to Socket.IO server");
+      return;
     } else {
       Socket.on("connect", () => {
         console.log("Connected to Socket.IO server");
@@ -163,19 +163,17 @@ const CreateNewBranchPage = () => {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <div
-                className={`h-2.5 w-2.5 rounded-full ${
-                  selectedBranch?.shopOpen
+                className={`h-2.5 w-2.5 rounded-full ${selectedBranch?.shopOpen
                     ? "bg-emerald-500 animate-pulse"
                     : "bg-slate-400"
-                }`}
+                  }`}
               />
 
               <span
-                className={`text-xs font-semibold ${
-                  selectedBranch?.shopOpen
+                className={`text-xs font-semibold ${selectedBranch?.shopOpen
                     ? "text-emerald-600"
                     : "text-slate-400"
-                }`}
+                  }`}
               >
                 {selectedBranch?.shopOpen ? "LIVE" : "OFFLINE"}
               </span>

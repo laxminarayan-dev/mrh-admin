@@ -228,10 +228,7 @@ const Navbar = () => {
   return (
     <>
       <nav className="fixed top-0 left-0 w-full z-100 bg-white min-h-16 max-h-16 border-b-2 border-slate-900">
-        <div className="px-4 sm:px-6 py-3 mx-auto flex items-center justify-between bg-white border-b border-slate-200 shadow-sm">
-          {/* Left */}
-
-
+        <div className="px-4 sm:px-6 py-3 mx-auto flex items-center justify-end bg-white border-b border-slate-200 shadow-sm">
           {/* Right */}
           <div className="flex items-center gap-3">
             {/* Branch switcher */}

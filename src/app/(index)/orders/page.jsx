@@ -18,7 +18,7 @@ const OrdersHistory = () => {
   // socket connection status logging
   useEffect(() => {
     if (Socket.connected) {
-      console.log("Already connected to Socket.IO server");
+      return;
     } else {
       Socket.on("connect", () => {
         console.log("Connected to Socket.IO server");
@@ -36,7 +36,7 @@ const OrdersHistory = () => {
 
   useEffect(() => {
     if (Socket.connected) {
-      console.log("Already connected to Socket.IO server");
+      return;
     } else {
       Socket.on("connect", () => {
         console.log("Connected to Socket.IO server");
@@ -52,7 +52,7 @@ const OrdersHistory = () => {
     <Fragment>
       <OrderHeader onAddData={loadData} />
       {data.length <= 0 ? (
-        <div className="w-[38rem] bg-white shadow h-80 flex justify-center items-center rounded-md">
+        <div className="w-full bg-white shadow h-() flex justify-center items-center rounded-md">
           <h1 className="text-lg text-gray-700">No data to display.</h1>
         </div>
       ) : (

@@ -25,3 +25,26 @@ export const fetchOneOrder = async (orderID) => {
         return ordersInitialData;
     }
 };
+
+
+export const updateOrder = async (order, setIsUpdating) => {
+    try {
+        setIsUpdating(true);
+        const res = await fetch(`${BACKEND_URL}/api/orders/update/${order._id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(order),
+        });
+        return await res.json();
+    } catch (error) {
+        return null;
+    } finally {
+        setIsUpdating(false);
+    }
+};
+
+
+
+

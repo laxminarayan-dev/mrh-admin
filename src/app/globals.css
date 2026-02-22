@@ -2,9 +2,23 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+
 /* Hide Leaflet Routing Machine UI */
 .leaflet-routing-container {
   display: none !important;
+}
+
+@font-face {
+  font-family: "Fredoka";
+  src: url("/fonts/Fredoka-Medium.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  font-family: "Fredoka";
+  font-style: normal;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -164,20 +178,24 @@ body {
 
 /* Animation keyframes */
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-10px);
   }
 }
 
 @keyframes pulse-glow {
+
   0%,
   100% {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
   }
+
   50% {
     box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
   }
@@ -229,6 +247,7 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

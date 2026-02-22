@@ -33,14 +33,14 @@ const getShopStatus = (shop) => {
   if (!shop) return { label: "", className: "" };
   return shop.shopOpen
     ? {
-        label: "Open",
-        className:
-          "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20",
-      }
+      label: "Open",
+      className:
+        "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20",
+    }
     : {
-        label: "Closed",
-        className: "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20",
-      };
+      label: "Closed",
+      className: "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20",
+    };
 };
 
 const Navbar = () => {
@@ -183,17 +183,17 @@ const Navbar = () => {
     {
       title: "Manage",
       links: [
-        {
-          id: "financials",
-          label: "Financials",
-          icon: BadgeIndianRupee,
-          path: "/financials/expenses", // This is used for router.push
-          matchPaths: [
-            "/financials/expenses",
-            "/financials/salary",
-            "/financials/income",
-          ], // This is used for active highlighting
-        },
+        // {
+        //   id: "financials",
+        //   label: "Financials",
+        //   icon: BadgeIndianRupee,
+        //   path: "/financials/expenses", // This is used for router.push
+        //   matchPaths: [
+        //     "/financials/expenses",
+        //     "/financials/salary",
+        //     "/financials/income",
+        //   ], // This is used for active highlighting
+        // },
         {
           id: "inventory",
           label: "Inventory",
@@ -204,20 +204,20 @@ const Navbar = () => {
         { id: "branch", label: "Branch", icon: Store, path: "/branch" },
       ],
     },
-    {
-      title: "Update",
-      links: [{ id: "menu", label: "Menu", icon: ChefHat, path: "/menu" }],
-    },
+    // {
+    //   title: "Update",
+    //   links: [{ id: "menu", label: "Menu", icon: ChefHat, path: "/menu" }],
+    // },
     {
       title: "Track",
       links: [
         { id: "orders", label: "Orders", icon: ShoppingCart, path: "/orders" },
-        {
-          id: "Transactions",
-          label: "Transactions",
-          icon: ArrowLeftRight,
-          path: "/transactions",
-        },
+        // {
+        //   id: "Transactions",
+        //   label: "Transactions",
+        //   icon: ArrowLeftRight,
+        //   path: "/transactions",
+        // },
       ],
     },
     {
@@ -402,9 +402,8 @@ const Navbar = () => {
       <div className="flex">
         {/* Sidebar */}
         <aside
-          className={`fixed top-19 z-[101] h-[calc(100vh-4.5rem)] p-4 transform-gpu will-change-transform transition-transform duration-500 ease-out md:translate-x-0 md:block md:w-64 md:transition-none ${
-            isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } w-64 bg-white text-slate-900 shadow-lg border-r border-slate-200/60`}
+          className={`fixed top-19 z-[101] h-[calc(100vh-4.5rem)] p-4 transform-gpu will-change-transform transition-transform duration-500 ease-out md:translate-x-0 md:block md:w-64 md:transition-none ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } w-64 bg-white text-slate-900 shadow-lg border-r border-slate-200/60`}
           aria-label="Main sidebar"
         >
           <div className="flex flex-col justify-between h-full">
@@ -459,11 +458,10 @@ const Navbar = () => {
                             if (isMobileSidebarOpen)
                               setIsMobileSidebarOpen(false);
                           }}
-                          className={`group flex items-center gap-3 w-full text-sm px-3 py-2 rounded-lg transition-colors duration-200 ${
-                            isActive
-                              ? "bg-gradient-to-r from-indigo-500/10 to-indigo-400/5 shadow-sm text-indigo-700"
-                              : "text-gray-700 hover:bg-slate-50"
-                          }`}
+                          className={`group flex items-center gap-3 w-full text-sm px-3 py-2 rounded-lg transition-colors duration-200 ${isActive
+                            ? "bg-gradient-to-r from-indigo-500/10 to-indigo-400/5 shadow-sm text-indigo-700"
+                            : "text-gray-700 hover:bg-slate-50"
+                            }`}
                         >
                           <span
                             className={`inline-flex items-center justify-center w-9 h-9 rounded-md ${isActive ? "bg-indigo-500 text-white" : "bg-slate-100 text-indigo-500 group-hover:bg-indigo-50"}`}
@@ -486,11 +484,10 @@ const Navbar = () => {
 
         {/* Overlay for mobile sidebar */}
         <div
-          className={`fixed bg-slate-900/70 z-[100] md:hidden top-0 left-0 w-full h-screen transition-opacity duration-300 ease-out ${
-            isMobileSidebarOpen
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
-          }`}
+          className={`fixed bg-slate-900/70 z-[100] md:hidden top-0 left-0 w-full h-screen transition-opacity duration-300 ease-out ${isMobileSidebarOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+            }`}
           onClick={() => setIsMobileSidebarOpen(false)}
           aria-hidden="true"
         />

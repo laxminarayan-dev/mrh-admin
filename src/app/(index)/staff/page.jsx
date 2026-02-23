@@ -23,6 +23,7 @@ import NoEmployeesFound from "@/components/Staff/NoEmployeesFound";
 import { useRouter } from "next/navigation";
 import { deleteEmployee, getEmployees } from "@/store/employeeAPI";
 import { capitalizeWords, formatDate, formatEMPID } from "@/lib/utils";
+import Socket from "@/components/Socket/socket";
 
 /* ── Role Badge ── */
 const RoleBadge = ({ role }) => {
@@ -89,7 +90,7 @@ const FieldBlock = ({ icon, label, value, mono = false, children }) => (
     </span>
     {children ?? (
       <span
-        className={`text-sm font-medium text-slate-700 ${mono ? "font-mono tracking-wide" : ""}`}
+        className={`text-sm font-medium text-slate-700 ${mono ? "font-mono tracking-wide" : ""} truncate`}
       >
         {value || "—"}
       </span>
@@ -108,9 +109,30 @@ export default function StaffManagement() {
   const router = useRouter();
 
   useEffect(() => {
+    Socket.on("connect", () => {
+      console.log("Connected to Socket.IO server");
+    });
+    Socket.on("admin-empupdate", (data) => {
+      getEmployees()
+        .then((res) => {
+          setEmployees(res);
+        })
+        .catch(() => setEmployees([]));
+    });
+
+    Socket.on("disconnect", () => {
+      console.log("Disconnected from Socket.IO server");
+    });
+    return () => {
+      Socket.off("connect");
+      Socket.off("admin-empupdate");
+      Socket.off("disconnect");
+    };
+  }, []);
+
+  useEffect(() => {
     getEmployees()
       .then((res) => {
-        console.log(res);
         setEmployees(res);
       })
       .catch(() => setEmployees([]));
@@ -132,11 +154,6 @@ export default function StaffManagement() {
     cook: employees.filter((e) => e.role === "cook").length,
     worker: employees.filter((e) => e.role === "worker").length,
     rider: employees.filter((e) => e.role === "rider").length,
-  };
-
-  const handleDelete = (empId) => {
-    if (window.confirm(`Delete ${empId}?`))
-      setEmployees((prev) => prev.filter((e) => e.empId !== empId));
   };
 
   return (

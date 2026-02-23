@@ -24,6 +24,11 @@ export const STATUS_CONFIG = {
     badge: "bg-purple-50 text-purple-700 border border-purple-200",
     dot: "bg-purple-500",
   },
+  out_for_delivery: {
+    label: "Out for Delivery",
+    badge: "bg-purple-50 text-purple-700 border border-purple-200",
+    dot: "bg-purple-500",
+  },
   delivered: {
     label: "Delivered",
     badge: "bg-emerald-50 text-emerald-700 border border-emerald-200",
@@ -41,13 +46,12 @@ export const STATUS_CONFIG = {
   },
 };
 
-
 // ─── Main Table ──────────────────────────────────────────────────────────────
 export default function OrdersTable({
   orders = [],
   riders = [],
-  onStatusChange = () => { },
-  onAssignRider = () => { },
+  onStatusChange = () => {},
+  onAssignRider = () => {},
 }) {
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -55,7 +59,9 @@ export default function OrdersTable({
   useEffect(() => {
     const filterOrders = () => {
       setSelectedOrders(
-        orders.filter((o) => o.shopId === localStorage.getItem("mrh_active_shop_id"))
+        orders.filter(
+          (o) => o.shopId === localStorage.getItem("mrh_active_shop_id"),
+        ),
       );
     };
 
@@ -73,12 +79,13 @@ export default function OrdersTable({
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
-
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <div>
           <h2 className="text-sm font-semibold text-gray-900">Orders</h2>
-          <p className="text-xs text-gray-400 mt-0.5">{selectedOrders.length} total orders</p>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {selectedOrders.length} total orders
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -91,7 +98,9 @@ export default function OrdersTable({
           >
             <option value="all">All Orders</option>
             {Object.entries(STATUS_CONFIG).map(([val, cfg]) => (
-              <option key={val} value={val}>{cfg.label}</option>
+              <option key={val} value={val}>
+                {cfg.label}
+              </option>
             ))}
           </select>
 
@@ -107,7 +116,15 @@ export default function OrdersTable({
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gray-50 border-b border-gray-100">
-            {["Order ID", "Date & Time", "Amount", "Status", "Assign Rider", "Change Status", ""].map((h, i) => (
+            {[
+              "Order ID",
+              "Date & Time",
+              "Amount",
+              "Status",
+              "Assign Rider",
+              "Change Status",
+              "",
+            ].map((h, i) => (
               <th
                 key={i}
                 className={`px-4 py-2.5 text-[11px] font-semibold text-gray-400 uppercase tracking-widest whitespace-nowrap ${i === 0 ? "text-center" : "text-left"}`}
@@ -126,7 +143,11 @@ export default function OrdersTable({
                   <div className="relative w-20 h-20 flex items-center justify-center">
                     <div className="absolute inset-0 rounded-full border border-dashed border-gray-200 bg-gradient-to-b from-gray-50 to-gray-100" />
                     <div className="absolute inset-4 rounded-full bg-gray-100 border border-gray-200" />
-                    <ShoppingBag size={26} className="relative z-10 text-gray-300 animate-bounce" strokeWidth={1.5} />
+                    <ShoppingBag
+                      size={26}
+                      className="relative z-10 text-gray-300 animate-bounce"
+                      strokeWidth={1.5}
+                    />
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-semibold text-gray-700 mb-1">
@@ -135,9 +156,19 @@ export default function OrdersTable({
                         : `No ${STATUS_CONFIG[statusFilter]?.label ?? statusFilter} orders`}
                     </p>
                     <p className="text-xs text-gray-400 leading-relaxed">
-                      {statusFilter === "all"
-                        ? <>Orders for this outlet will appear here<br />once customers start placing them.</>
-                        : <>No orders match this status right now.<br />Try a different filter.</>}
+                      {statusFilter === "all" ? (
+                        <>
+                          Orders for this outlet will appear here
+                          <br />
+                          once customers start placing them.
+                        </>
+                      ) : (
+                        <>
+                          No orders match this status right now.
+                          <br />
+                          Try a different filter.
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>

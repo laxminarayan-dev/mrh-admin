@@ -88,3 +88,17 @@ export const deleteEmployee = async (id) => {
         throw error;
     }
 };
+
+export const getRiders = async () => {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/employee/role/rider`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch riders');
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching riders:', error);
+        throw error;
+    }
+};

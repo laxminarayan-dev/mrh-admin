@@ -10,11 +10,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <div className="bg-white text-slate-900 ">
+        <div className="bg-slate-50 text-slate-900 ">
           <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
             <Navbar />
             <div className="flex-1 overflow-hidden mt-20">
-              <div className="ml-0 md:ml-64 p-4 bg-white">{children}</div>
+              <div className="ml-0 md:ml-64 p-4 ">{children}</div>
             </div>
           </div>
         </div>

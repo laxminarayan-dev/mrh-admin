@@ -21,17 +21,26 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (Socket.connected) {
-      return;
-    } else {
-      Socket.on("connect", () => {
-        console.log("Connected to Socket.IO server");
-      });
+    if (!Socket.connected) {
+      Socket.connect();
     }
+    Socket.on("connect", () => {
+      console.log("Connected to Socket.IO server");
+    });
+
+    Socket.on("new-order", () => {
+      console.log("Received 'new-order' event from Socket.IO server");
+      loadData(setLoadingFun);
+    })
 
     Socket.on("disconnect", () => {
       console.log("Disconnected from Socket.IO server");
     });
+    return () => {
+      Socket.off("connect");
+      Socket.off("new-order");
+      Socket.off("disconnect");
+    }
   }, []);
 
   useEffect(() => {

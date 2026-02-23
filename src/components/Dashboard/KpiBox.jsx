@@ -51,8 +51,8 @@ const KPIBoxGroup = ({ kpiData }) => {
   };
 
   return (
-    <div className="mb-12 max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
+    <div className="mb-12 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 px-4">
         {kpiData.map((box, index) => {
           const colors = getGradientColors(box.icon);
           const isPositiveChange =
@@ -89,9 +89,8 @@ const KPIBoxGroup = ({ kpiData }) => {
                       <TrendingDown className="h-4 w-4 text-red-500" />
                     )}
                     <span
-                      className={`text-sm font-medium ${
-                        isPositiveChange ? "text-emerald-700" : "text-red-600"
-                      }`}
+                      className={`text-sm font-medium ${isPositiveChange ? "text-emerald-700" : "text-red-600"
+                        }`}
                     >
                       {box.subTitle}
                     </span>

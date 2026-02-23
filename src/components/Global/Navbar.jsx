@@ -33,7 +33,7 @@ const getShopStatus = (shop, active) => {
     ? {
       label: "Open",
       className:
-        `ring-1 ring-emerald-500/20 ${active ? "bg-emerald-500 text-emerald-50" : "bg-emerald-500/10  text-emerald-700"}`,
+        `ring-1 ring-emerald-500/80 ${active ? "bg-emerald-500 text-emerald-50" : "bg-emerald-500/10  text-emerald-700"}`,
     }
     : {
       label: "Closed",
@@ -234,23 +234,24 @@ const Navbar = () => {
                 return (
                   <button
                     type="button"
+                    disabled={isLoadingShops}
                     onClick={() => setIsBranchMenuOpen((v) => !v)}
                     className="group flex items-center gap-3 bg-white/70 hover:bg-white px-3 py-2 transition-all"
                     aria-haspopup="menu"
                     aria-expanded={isBranchMenuOpen}
                   >
-                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-slate-900/5 to-slate-900/0 ring-1 ring-slate-900/10 flex items-center justify-center">
-                      <Store className="w-5 h-5 text-slate-700" />
+                    <div className={`w-9 h-9 rounded-lg ring-1  flex items-center justify-center ${status.label == "Open" ? "ring-emerald-500 bg-emerald-100" : status.label === "Closed" ? "ring-red-500 bg-red-100" : "ring-gray-500 bg-gray-100"}`}>
+                      <Store className={`w-5 h-5 ${status.label == "Open" ? "text-emerald-600" : status.label === "Closed" ? "text-red-600" : "text-gray-600"}`} />
                     </div>
 
                     <div className="hidden sm:block text-left">
-                      <p className="text-sm font-semibold text-gray-900 leading-tight">
+                      <p className="text-sm font-light text-gray-900 leading-tight">
                         {getShopLabel(activeShop)}
                       </p>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center gap-2 mt-1">
                         {status.label ? (
                           <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${status.className}`}
+                            className={`text-[10px] font-light px-1.5 py-0.3 rounded-full ${status.className}`}
                           >
                             {status.label}
                           </span>

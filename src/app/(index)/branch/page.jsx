@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import {
   Loader,
@@ -10,7 +9,6 @@ import {
   CircleCheck,
   CircleOff,
 } from "lucide-react";
-
 import { Switch } from "@/components/ui/switch";
 import {
   Card,
@@ -19,37 +17,87 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fetchShops, updateShop } from "@/store/shopAPI";
 import { fetchFoodItems } from "../inventory/page";
 import Socket from "@/components/Socket/socket";
-import { useRouter } from "next/navigation";
+
+const getChanges = (original, updated) => {
+  const changes = {};
+  const allKeys = new Set([...Object.keys(original), ...Object.keys(updated)]);
+  for (const key of allKeys) {
+    if (key !== "shopOpen" && key !== "menuItems") continue;
+    if (key === "menuItems") {
+      if (original[key]?.length !== updated[key]?.length || !original[key]?.every(item => updated[key]?.includes(item))) {
+        changes[key] = { from: original[key], to: updated[key] };
+      }
+    }
+    if (key == "shopOpen" && original[key] !== updated[key]) {
+      changes[key] = { from: original[key], to: updated[key] };
+    }
+  }
+  if (Object.keys(changes).length > 0) {
+    return true
+  }
+  else {
+    return false
+  }
+};
 
 const CreateNewBranchPage = () => {
   const [branches, setBranches] = useState([]);
   const [selectedBranchId, setSelectedBranchId] = useState(null);
   const [selectedBranch, setSelectedBranch] = useState(null);
+  const [selectedBranchCopy, setSelectedBranchCopy] = useState(null);
   const [items, setItems] = useState([]);
+  // const [isDirty,] = selectedBranch && selectedBranchCopy && getChanges(selectedBranchCopy, selectedBranch);
+  const [isDirty, setIsDirty] = useState(false);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+
+
 
   // socket connection status logging
   useEffect(() => {
-    if (Socket.connected) {
-      return;
-    } else {
-      Socket.on("connect", () => {
-        console.log("Connected to Socket.IO server");
-      });
+    if (!Socket.connected) {
+      Socket.connect();
     }
+    Socket.on("connect", () => {
+      console.log("Connected to Socket.IO server");
+    });
+
+    Socket.on("shop-updated", () => {
+      fetchShops().then((data) => {
+        setSelectedBranchCopy(null);
+        setBranches(data);
+        const active = data.find((b) => b._id === selectedBranchId);
+        if (active) setSelectedBranch(active);
+      }).catch((err) => {
+        console.error("Error fetching shops after update:", err);
+        setBranches([]);
+      });
+    })
 
     Socket.on("disconnect", () => {
       console.log("Disconnected from Socket.IO server");
     });
+    return () => {
+      Socket.off("connect");
+      Socket.off("disconnect");
+    }
   }, []);
 
   /* ---------------- INIT ---------------- */
+  useEffect(() => {
+    if (selectedBranch && selectedBranchCopy == null) {
+      setSelectedBranchCopy({ ...selectedBranch });
+    }
+  }, [selectedBranch]);
+
+  useEffect(() => {
+    const isDirty = selectedBranch && selectedBranchCopy && getChanges(selectedBranchCopy, selectedBranch);
+    setIsDirty(isDirty);
+  }, [selectedBranch, selectedBranchCopy]);
+
 
   useEffect(() => {
     const id = localStorage.getItem("mrh_active_shop_id");
@@ -65,6 +113,10 @@ const CreateNewBranchPage = () => {
 
     loadData();
   }, []);
+
+  useEffect(() => {
+    console.log("Items loaded:", items.forEach((i) => console.log(i._id)));
+  }, [items]);
 
   useEffect(() => {
     if (Array.isArray(branches) && branches.length > 0) {
@@ -85,28 +137,19 @@ const CreateNewBranchPage = () => {
   /* ---------------- HANDLERS ---------------- */
 
   const handleToggleShop = (checked) => {
-    setBranches((prev) =>
-      prev.map((b) =>
-        b._id === selectedBranch._id ? { ...b, shopOpen: checked } : b,
-      ),
-    );
+    setSelectedBranch((prev) => ({ ...prev, shopOpen: checked }));
   };
 
   const handleToggleItem = (itemId, checked) => {
-    setBranches((prev) =>
-      prev.map((b) => {
-        if (b._id === selectedBranch._id) {
-          const menuItems = b.menuItems || [];
-          return {
-            ...b,
-            menuItems: checked
-              ? [...menuItems, itemId]
-              : menuItems.filter((id) => id !== itemId),
-          };
-        }
-        return b;
-      }),
-    );
+    setSelectedBranch((prev) => {
+      const menuItems = prev.menuItems || [];
+      return {
+        ...prev,
+        menuItems: checked
+          ? [...menuItems, itemId]
+          : menuItems.filter((id) => id !== itemId),
+      };
+    });
   };
 
   /* ---------------- LOADING ---------------- */
@@ -114,7 +157,7 @@ const CreateNewBranchPage = () => {
   if (loading) {
     return (
       <div className="flex h-[80vh] flex-col items-center justify-center gap-4">
-        <Loader className="animate-spin text-slate-400" size={42} />
+        <Loader className="animate-spin text-slate-400" size={32} />
         <p className="text-sm text-slate-500 font-medium">
           Loading branch configuration...
         </p>
@@ -127,13 +170,35 @@ const CreateNewBranchPage = () => {
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-          Branch Control
-        </h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Manage availability and configure your outlet menu.
-        </p>
+      <div className="flex flex-col md:flex-row justify-center md:justify-between items-start md:items-end gap-4 md:gap-0">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+            Branch Control
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Manage availability and configure your outlet menu.
+          </p>
+        </div>
+        {isDirty && (<div className="flex gap-4 justify-center items-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.location.reload()}
+          >
+            <RotateCcw size={16} className="mr-2" />
+            Reset
+          </Button>
+
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
+            onClick={() => {
+              updateShop(selectedBranch._id, { ...selectedBranch });
+            }}
+          >
+            <Save size={16} className="mr-2" />
+            Save Changes
+          </Button>
+        </div>)}
       </div>
 
       {/* Main Card */}
@@ -230,27 +295,6 @@ const CreateNewBranchPage = () => {
           </div>
         </CardContent>
 
-        {/* Footer */}
-        <CardFooter className="flex justify-between border-t p-4 bg-white/60 backdrop-blur sticky bottom-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => window.location.reload()}
-          >
-            <RotateCcw size={16} className="mr-2" />
-            Reset
-          </Button>
-
-          <Button
-            className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
-            onClick={() => {
-              updateShop(selectedBranch._id, { ...selectedBranch });
-            }}
-          >
-            <Save size={16} className="mr-2" />
-            Save Changes
-          </Button>
-        </CardFooter>
       </Card>
     </div>
   );

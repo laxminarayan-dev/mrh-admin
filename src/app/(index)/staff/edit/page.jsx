@@ -16,9 +16,9 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { addEmployee } from "@/store/employeeAPI";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getEmployeeById, updateEmployee } from "@/store/employeeAPI";
 import { capitalizeWords } from "@/lib/utils";
 
 const EMPTY = {
@@ -103,13 +103,32 @@ const ROLES = [
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-const AddEmployee = ({ onBack, onSuccess }) => {
+const EditEmployee = () => {
+  const searchParams = useSearchParams();
+  const empId = searchParams.get("id");
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (!empId) {
+      alert("No employee ID provided.");
+      router.push("/staff");
+      return;
+    }
+    getEmployeeById(empId)
+      .then((data) => {
+        setForm({ ...data, confirmPassword: data.password });
+      })
+      .catch((err) => {
+        alert("Failed to fetch employee data. Please try again.");
+        console.error("Fetch employee error:", err);
+        router.push("/staff");
+      });
+  }, [empId, router]);
 
   const set = (k, v) => {
     setForm((p) => ({ ...p, [k]: v }));
@@ -142,14 +161,13 @@ const AddEmployee = ({ onBack, onSuccess }) => {
       setErrors(errs);
       return;
     }
-    addEmployee(form)
-      .then((res) => {
-        console.log("Employee added:", res);
+    updateEmployee({ ...form, _id: empId })
+      .then(() => {
         setSubmitted(true);
       })
       .catch((err) => {
-        alert("Failed to add employee. Please try again.");
-        console.error("Add employee error:", err);
+        alert("Failed to update employee. Please try again.");
+        console.error("Update employee error:", err);
       });
   };
 
@@ -160,7 +178,9 @@ const AddEmployee = ({ onBack, onSuccess }) => {
           <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center animate-bounce">
             <CheckCircle2 size={36} className="text-green-500" />
           </div>
-          <h2 className="text-xl font-bold text-slate-800">Employee Added!</h2>
+          <h2 className="text-xl font-bold text-slate-800">
+            Employee Updateed!
+          </h2>
           <p className="text-sm text-slate-500 text-center">
             <span className="font-semibold text-slate-700">{form.name}</span>{" "}
             joined as a{" "}
@@ -189,7 +209,7 @@ const AddEmployee = ({ onBack, onSuccess }) => {
           </button>
           <div>
             <h1 className="text-xl font-bold text-slate-800">
-              Add New Employee
+              Update Employee
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">
               Fields marked <span className="text-red-400">*</span> are required
@@ -300,11 +320,11 @@ const AddEmployee = ({ onBack, onSuccess }) => {
             </div>
           </Section>
 
-          {/* Address */}
-          <Section title="Address">
+          {/* address */}
+          <Section title="address">
             <div className="flex flex-col gap-4">
               <Field
-                label="Street Address"
+                label="Street address"
                 icon={<MapPin size={12} />}
                 required
                 error={errors.address}
@@ -341,6 +361,7 @@ const AddEmployee = ({ onBack, onSuccess }) => {
                 </Field>
                 <Field label="Pincode" error={errors.pincode}>
                   <input
+                    type="number"
                     value={form.pincode}
                     onChange={(e) => set("pincode", e.target.value)}
                     placeholder="6-digit"
@@ -391,7 +412,7 @@ const AddEmployee = ({ onBack, onSuccess }) => {
               >
                 <input
                   type="date"
-                  value={form.dateOfJoining}
+                  value={form.dateOfJoining?.split("T")[0] || ""}
                   onChange={(e) => set("dateOfJoining", e.target.value)}
                   className={inputCls}
                 />
@@ -476,7 +497,7 @@ const AddEmployee = ({ onBack, onSuccess }) => {
               type="submit"
               className="px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-sm transition-colors"
             >
-              Add Employee
+              Update Employee
             </button>
           </div>
         </form>
@@ -485,4 +506,4 @@ const AddEmployee = ({ onBack, onSuccess }) => {
   );
 };
 
-export default AddEmployee;
+export default EditEmployee;

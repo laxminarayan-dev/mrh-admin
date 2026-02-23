@@ -5,11 +5,8 @@ import {
   X,
   ShoppingCart,
   Package,
-  ChefHat,
   ChartColumnBig,
-  BadgeIndianRupee,
   UserRoundCog,
-  ArrowLeftRight,
   LogOut,
   Menu,
   ChevronDown,
@@ -17,83 +14,101 @@ import {
   Check,
   Plus,
 } from "lucide-react";
-import { cloneShop, fetchShops } from "@/store/shopAPI";
+import { fetchShops } from "@/store/shopAPI";
 import {
   getActiveShopId,
   onActiveShopChange,
   setActiveShopId,
 } from "@/lib/activeShop";
+import Socket from "../Socket/socket";
 
 const getShopLabel = (shop) => {
   if (!shop) return "Select Branch";
   return shop.name || shop.code || "Branch";
 };
 
-const getShopStatus = (shop) => {
+const getShopStatus = (shop, active) => {
   if (!shop) return { label: "", className: "" };
   return shop.shopOpen
     ? {
-        label: "Open",
-        className:
-          "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20",
-      }
+      label: "Open",
+      className:
+        `ring-1 ring-emerald-500/20 ${active ? "bg-emerald-500 text-emerald-50" : "bg-emerald-500/10  text-emerald-700"}`,
+    }
     : {
-        label: "Closed",
-        className: "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20",
-      };
+      label: "Closed",
+      className: `ring-1 ring-rose-500/80 ${active ? "bg-rose-500 text-rose-50" : "bg-rose-500/10  text-rose-700"}`
+    };
 };
 
 const Navbar = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isBranchMenuOpen, setIsBranchMenuOpen] = useState(false);
+  const [isLoadingShops, setIsLoadingShops] = useState(true);
   const [shops, setShops] = useState([]);
   const [activeShopId, setActiveShopIdState] = useState(null);
-  const [isAddBranchOpen, setIsAddBranchOpen] = useState(false);
-  const [newBranchName, setNewBranchName] = useState("");
-  const [newBranchCode, setNewBranchCode] = useState("");
-  const [isCreatingBranch, setIsCreatingBranch] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const branchMenuRef = useRef(null);
 
+
   const refreshShops = async () => {
+    setIsLoadingShops(true);
     const list = await fetchShops();
     setShops(Array.isArray(list) ? list : []);
+    setIsLoadingShops(false);
     return Array.isArray(list) ? list : [];
   };
+
+  useEffect(() => {
+    if (!Socket.connected) {
+      Socket.connect();
+    }
+    Socket.on("connect", () => {
+      console.log("Connected to Socket.IO server");
+    });
+    Socket.on("disconnect", () => {
+      console.log("Disconnected from Socket.IO server");
+    });
+    Socket.on("shop-updated", async () => {
+      console.log("Received shop-update event, refreshing shops...");
+      refreshShops();
+    });
+
+    return () => {
+      Socket.off("connect");
+      Socket.off("disconnect");
+      Socket.off("shop-updated")
+    };
+  }, [])
+
 
   useEffect(() => {
     setActiveShopIdState(getActiveShopId());
     return onActiveShopChange((shopId) => setActiveShopIdState(shopId));
   }, []);
 
+  const load = async () => {
+    setIsLoadingShops(true);
+    const list = await fetchShops();
+
+    setShops(Array.isArray(list) ? list : []);
+
+    const stored = getActiveShopId();
+    setIsLoadingShops(false);
+    const hasStored = stored && list?.some?.((s) => s?._id === stored);
+    if (!hasStored && list && list.length > 0) {
+      setActiveShopId(list[0]._id);
+      setActiveShopIdState(list[0]._id);
+    }
+  };
+
   useEffect(() => {
-    let isMounted = true;
-    const load = async () => {
-      const list = await fetchShops();
-      if (!isMounted) return;
-
-      setShops(Array.isArray(list) ? list : []);
-
-      const stored = getActiveShopId();
-      const hasStored = stored && list?.some?.((s) => s?._id === stored);
-      if (!hasStored && list && list.length > 0) {
-        setActiveShopId(list[0]._id);
-        setActiveShopIdState(list[0]._id);
-      }
-    };
     load();
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   useEffect(() => {
     if (!isBranchMenuOpen) return;
-
-    setIsAddBranchOpen(false);
-    setNewBranchName("");
-    setNewBranchCode("");
 
     const onKeyDown = (e) => {
       if (e.key === "Escape") setIsBranchMenuOpen(false);
@@ -138,35 +153,6 @@ const Navbar = () => {
     };
   }, [isMobileSidebarOpen]);
 
-  const handleCreateBranch = async () => {
-    const name = newBranchName.trim();
-    const code = newBranchCode.trim();
-
-    if (!name) return;
-    if (shops.length === 0) return;
-
-    const sourceShopId = activeShopId || shops[0]?._id;
-    if (!sourceShopId) return;
-
-    setIsCreatingBranch(true);
-    const result = await cloneShop({ sourceShopId, name, code });
-    setIsCreatingBranch(false);
-
-    if (!result.ok || !result.shop?._id) {
-      // minimal, no extra UI components
-      window.alert(result.message || "Failed to create branch");
-      return;
-    }
-
-    await refreshShops();
-    setActiveShopId(result.shop._id);
-    setActiveShopIdState(result.shop._id);
-    setIsAddBranchOpen(false);
-    setNewBranchName("");
-    setNewBranchCode("");
-    setIsBranchMenuOpen(false);
-    router.refresh?.();
-  };
 
   const sidebarItems = [
     {
@@ -310,7 +296,7 @@ const Navbar = () => {
                     ) : (
                       shops.map((shop) => {
                         const isActive = shop?._id === activeShopId;
-                        const status = getShopStatus(shop);
+                        const status = getShopStatus(shop, isActive);
                         return (
                           <button
                             key={shop._id}
@@ -320,16 +306,16 @@ const Navbar = () => {
                               setActiveShopId(shop._id);
                               setIsBranchMenuOpen(false);
                             }}
-                            className={`w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors ${isActive ? "bg-slate-50" : ""}`}
+                            className={`w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors font-light ${isActive ? "bg-slate-800 text-slate-200" : "text-gray-900"}`}
                           >
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold text-gray-900 truncate">
+                            <div className="min-w-0 text-left gap-1 flex flex-col items-start">
+                              <p className="text-sm   truncate">
                                 {getShopLabel(shop)}
                               </p>
                               <div className="flex items-center gap-2 mt-1">
                                 {status.label && (
                                   <span
-                                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${status.className}`}
+                                    className={`text-[10px] px-2 py-0.5 rounded-full ${status.className}`}
                                   >
                                     {status.label}
                                   </span>
@@ -397,9 +383,8 @@ const Navbar = () => {
       <div className="flex  ">
         {/* Sidebar */}
         <aside
-          className={`border-r-2 fixed top-0 z-100 h-screen p-4 transform-gpu will-change-transform transition-transform duration-500 ease-out md:translate-x-0 md:block md:w-64 md:transition-none ${
-            isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } w-64 bg-white text-slate-900 shadow-lg border-r border-slate-200/60`}
+          className={`border-r-2 fixed top-0 z-100 h-screen p-4 transform-gpu will-change-transform transition-transform duration-500 ease-out md:translate-x-0 md:block md:w-64 md:transition-none ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } w-64 bg-white text-slate-900 shadow-lg border-r border-slate-200/60`}
           aria-label="Main sidebar"
         >
           <div className="flex flex-col justify-between h-full">
@@ -457,11 +442,10 @@ const Navbar = () => {
                             if (isMobileSidebarOpen)
                               setIsMobileSidebarOpen(false);
                           }}
-                          className={`group flex items-center gap-3 w-full text-sm px-3 py-2 rounded-lg transition-colors duration-200 ${
-                            isActive
-                              ? "bg-gradient-to-r from-indigo-500/10 to-indigo-400/5 shadow-sm text-indigo-700"
-                              : "text-gray-700 hover:bg-slate-50"
-                          }`}
+                          className={`group flex items-center gap-3 w-full text-sm px-3 py-2 rounded-lg transition-colors duration-200 ${isActive
+                            ? "bg-gradient-to-r from-indigo-500/10 to-indigo-400/5 shadow-sm text-indigo-700"
+                            : "text-gray-700 hover:bg-slate-50"
+                            }`}
                         >
                           <span
                             className={`inline-flex items-center justify-center w-9 h-9 rounded-md ${isActive ? "bg-indigo-500 text-white" : "bg-slate-100 text-indigo-500 group-hover:bg-indigo-50"}`}
@@ -484,11 +468,10 @@ const Navbar = () => {
 
         {/* Overlay for mobile sidebar */}
         <div
-          className={`fixed bg-slate-900/70 z-99 md:hidden top-0 left-0 w-full h-screen transition-opacity duration-300 ease-out ${
-            isMobileSidebarOpen
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
-          }`}
+          className={`fixed bg-slate-900/70 z-99 md:hidden top-0 left-0 w-full h-screen transition-opacity duration-300 ease-out ${isMobileSidebarOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+            }`}
           onClick={() => setIsMobileSidebarOpen(false)}
           aria-hidden="true"
         />

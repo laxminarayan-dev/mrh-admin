@@ -22,27 +22,6 @@ export const fetchShops = async () => {
     }
 };
 
-export const cloneShop = async ({ sourceShopId, name, code }) => {
-    try {
-        const res = await fetch(`${BACKEND_URL}/api/shop/clone`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ sourceShopId, name, code }),
-        });
-
-        const json = await res.json().catch(() => ({}));
-        if (!res.ok) {
-            return { ok: false, message: json?.message || "Failed to create branch" };
-        }
-
-        return { ok: true, shop: json?.shop };
-    } catch {
-        return { ok: false, message: "Failed to create branch" };
-    }
-};
-
 export const updateShop = async (id, data) => {
     try {
         const res = await fetch(`${BACKEND_URL}/api/shop/update/${id}`, {
@@ -52,11 +31,10 @@ export const updateShop = async (id, data) => {
             },
             body: JSON.stringify(data),
         });
-        const json = await res.json().catch(() => ({}));
+        const json = await res.json()
         if (!res.ok) {
             return { ok: false, message: json?.message || "Failed to update shop" };
         }
-
         return { ok: true, shop: json?.shop };
     } catch (error) {
         console.error("Error updating shop:", error);

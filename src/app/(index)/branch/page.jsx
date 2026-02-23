@@ -164,15 +164,15 @@ const CreateNewBranchPage = () => {
             <div className="flex items-center gap-2">
               <div
                 className={`h-2.5 w-2.5 rounded-full ${selectedBranch?.shopOpen
-                    ? "bg-emerald-500 animate-pulse"
-                    : "bg-slate-400"
+                  ? "bg-emerald-500 animate-pulse"
+                  : "bg-slate-400"
                   }`}
               />
 
               <span
                 className={`text-xs font-semibold ${selectedBranch?.shopOpen
-                    ? "text-emerald-600"
-                    : "text-slate-400"
+                  ? "text-emerald-600"
+                  : "text-slate-400"
                   }`}
               >
                 {selectedBranch?.shopOpen ? "LIVE" : "OFFLINE"}
@@ -244,7 +244,6 @@ const CreateNewBranchPage = () => {
           <Button
             className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
             onClick={() => {
-              router.refresh();
               updateShop(selectedBranch._id, { ...selectedBranch });
             }}
           >

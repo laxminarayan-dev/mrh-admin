@@ -13,7 +13,8 @@ const OrdersHistory = () => {
   const loadData = async () => {
     const orders = await fetchAllOrder();
     const riders = await getRiders();
-    setRiders(riders);
+    let activeRiders = riders.filter((r) => r?.isActive === true);
+    setRiders(activeRiders);
     setData(orders);
   };
 
@@ -39,9 +40,12 @@ const OrdersHistory = () => {
     });
 
     Socket.on("admin-empupdate", (data) => {
+      console.log("emp update");
+
       getRiders()
         .then((riders) => {
-          setRiders(riders);
+          let activeRiders = riders.filter((r) => r?.isActive === true);
+          setRiders(activeRiders);
         })
         .catch((error) => {
           console.error("Error fetching riders:", error);

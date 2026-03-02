@@ -187,14 +187,18 @@ export default function OrderRow({ order, riders, isLast }) {
 
   // Called by StatusActions when an action button is clicked
   const handleStatusAction = async (nextStatus) => {
+    const riderInfo = riders.find((r) => r._id === selectedRider) || null;
     const updated = await updateOrder(
       {
         ...orderData,
         status: nextStatus,
-        riderInfo:
-          riders.find((r) => r._id === selectedRider) ||
-          orderData.riderInfo ||
-          null,
+        riderInfo: {
+          _id: riderInfo?._id || undefined,
+          name: riderInfo?.name || undefined,
+          phone: riderInfo?.phone || undefined,
+          email: riderInfo?.email || undefined,
+        },
+        assignedAt: nextStatus === "assigned" ? new Date().toISOString() : null,
       },
       setIsUpdating,
     );
@@ -235,24 +239,35 @@ export default function OrderRow({ order, riders, isLast }) {
         <td className="px-4 py-3.5">
           <div className="flex items-center gap-2">
             <div className="relative w-36">
-              <select
-                value={selectedRider}
-                disabled={currentStatus !== "ready"}
-                onChange={handleRiderChange}
-                className={`${selectClass} w-full disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400`}
-                style={{ backgroundImage: chevronBg }}
-              >
-                <option value="" disabled>
-                  Assign Rider
-                </option>
-                {riders.map((rider) => (
-                  <option key={rider._id} value={rider._id}>
-                    {formatEMPID(rider._id)}
-                    {" - "}
-                    {rider.name}
+              {orderData.status === "cancelled" ||
+              orderData.status === "rejected" ||
+              orderData.status === "delivered" ||
+              orderData.status === "out_for_delivery" ? (
+                <h1
+                  className={`${selectClass} w-full !cursor-not-allowed bg-gray-50 text-gray-400 flex justify-center items-center`}
+                >
+                  {orderData.riderInfo?.name || "Unassigned"}
+                </h1>
+              ) : (
+                <select
+                  value={selectedRider}
+                  disabled={currentStatus !== "ready"}
+                  onChange={handleRiderChange}
+                  className={`${selectClass} w-full disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400`}
+                  style={{ backgroundImage: chevronBg }}
+                >
+                  <option value="" disabled>
+                    Assign Rider
                   </option>
-                ))}
-              </select>
+                  {riders.map((rider) => (
+                    <option key={rider._id} value={rider._id}>
+                      {formatEMPID(rider._id)}
+                      {" - "}
+                      {rider.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
         </td>

@@ -48,6 +48,17 @@ const STATUS_MACHINE = {
   ready: {
     nextActions: [
       {
+        label: "Assign Rider",
+        icon: Bike,
+        nextStatus: "assigned",
+        style: "bg-blue-500 hover:bg-blue-600 text-white",
+        iconStyle: "text-white",
+      },
+    ],
+  },
+  assigned: {
+    nextActions: [
+      {
         label: "Out for Delivery",
         icon: Bike,
         nextStatus: "out_for_delivery",
@@ -104,7 +115,7 @@ const selectClass =
 
 // ─── StatusActions ─────────────────────────────────────────────────────────────
 // Renders the contextual action buttons based on current status
-function StatusActions({ currentStatus, onAction, isUpdating }) {
+function StatusActions({ currentStatus, onAction, isUpdating, selectedRider }) {
   const machine = STATUS_MACHINE[currentStatus];
 
   // Terminal states — nothing to do
@@ -123,11 +134,18 @@ function StatusActions({ currentStatus, onAction, isUpdating }) {
     <div className="flex items-center gap-1.5 flex-wrap">
       {machine.nextActions.map((action) => {
         const Icon = action.icon;
+        // Disable "Assign Rider" button when status is ready but no rider selected
+        const isDisabled =
+          isUpdating ||
+          (currentStatus === "ready" &&
+            action.nextStatus === "assigned" &&
+            !selectedRider);
+
         return (
           <button
             key={action.nextStatus}
             type="button"
-            disabled={isUpdating}
+            disabled={isDisabled}
             onClick={() => onAction(action.nextStatus)}
             className={`
                             inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[12px] font-light
@@ -165,17 +183,10 @@ export default function OrderRow({ order, riders, isLast }) {
   const { date, time } = formatDate(orderData.createdAt);
   const currentStatus = orderData.status || "placed";
 
-  // Rider assignment — only show Update btn if rider changed
-  const riderDirty = selectedRider !== (orderData.riderInfo?._id || "");
-
   const handleRiderChange = (e) => setSelectedRider(e.target.value);
 
   // Called by StatusActions when an action button is clicked
   const handleStatusAction = async (nextStatus) => {
-    if (nextStatus === "out_for_delivery" && !selectedRider) {
-      alert("Please assign a rider before marking as Ready.");
-      return;
-    }
     const updated = await updateOrder(
       {
         ...orderData,
@@ -184,18 +195,6 @@ export default function OrderRow({ order, riders, isLast }) {
           riders.find((r) => r._id === selectedRider) ||
           orderData.riderInfo ||
           null,
-      },
-      setIsUpdating,
-    );
-    setOrderData(updated.order);
-  };
-
-  // Called when only rider changes (status unchanged)
-  const handleRiderUpdate = async () => {
-    const updated = await updateOrder(
-      {
-        ...orderData,
-        riderInfo: riders.find((r) => r._id === selectedRider) || null,
       },
       setIsUpdating,
     );
@@ -255,16 +254,6 @@ export default function OrderRow({ order, riders, isLast }) {
                 ))}
               </select>
             </div>
-            {riderDirty && (
-              <button
-                type="button"
-                onClick={handleRiderUpdate}
-                disabled={isUpdating}
-                className="h-7 px-2.5 rounded-md bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-[11px] font-semibold transition-colors whitespace-nowrap"
-              >
-                {isUpdating ? "Saving…" : "Assign"}
-              </button>
-            )}
           </div>
         </td>
 
@@ -274,6 +263,7 @@ export default function OrderRow({ order, riders, isLast }) {
             currentStatus={currentStatus}
             onAction={handleStatusAction}
             isUpdating={isUpdating}
+            selectedRider={selectedRider}
           />
         </td>
 

@@ -19,6 +19,11 @@ export const STATUS_CONFIG = {
     badge: "bg-amber-50 text-amber-700 border border-amber-200",
     dot: "bg-amber-500",
   },
+  assigned: {
+    label: "Assigned",
+    badge: "bg-cyan-50 text-cyan-700 border border-cyan-200",
+    dot: "bg-cyan-500",
+  },
   "out-for-delivery": {
     label: "Out for Delivery",
     badge: "bg-purple-50 text-purple-700 border border-purple-200",

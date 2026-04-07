@@ -112,7 +112,7 @@ export default function StaffManagement() {
     Socket.on("connect", () => {
       console.log("Connected to Socket.IO server");
     });
-    Socket.on("admin-empupdate", (data) => {
+    Socket.on("admin-empupdate", () => {
       getEmployees()
         .then((res) => {
           setEmployees(res);
@@ -192,11 +192,10 @@ export default function StaffManagement() {
                 setRoleFilter(k);
                 setPage(1);
               }}
-              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all ${
-                active
-                  ? "bg-indigo-600 text-white border-indigo-600 shadow"
-                  : "bg-white text-slate-600 border-gray-200 hover:border-indigo-300"
-              }`}
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all ${active
+                ? "bg-indigo-600 text-white border-indigo-600 shadow"
+                : "bg-white text-slate-600 border-gray-200 hover:border-indigo-300"
+                }`}
             >
               {i}
               {l}
@@ -381,11 +380,10 @@ export default function StaffManagement() {
               <button
                 key={p}
                 onClick={() => setPage(p)}
-                className={`w-9 h-9 rounded-xl text-sm font-semibold transition-colors ${
-                  p === page
-                    ? "bg-indigo-600 text-white shadow"
-                    : "border border-gray-200 bg-white text-slate-500 hover:bg-gray-50"
-                }`}
+                className={`w-9 h-9 rounded-xl text-sm font-semibold transition-colors ${p === page
+                  ? "bg-indigo-600 text-white shadow"
+                  : "border border-gray-200 bg-white text-slate-500 hover:bg-gray-50"
+                  }`}
               >
                 {p}
               </button>

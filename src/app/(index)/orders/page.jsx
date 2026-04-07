@@ -39,9 +39,7 @@ const OrdersHistory = () => {
       );
     });
 
-    Socket.on("admin-empupdate", (data) => {
-      console.log("emp update");
-
+    Socket.on("admin-empupdate", () => {
       getRiders()
         .then((riders) => {
           let activeRiders = riders.filter((r) => r?.isActive === true);

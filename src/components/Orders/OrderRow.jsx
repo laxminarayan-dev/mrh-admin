@@ -239,15 +239,17 @@ export default function OrderRow({ order, riders, isLast }) {
         {/* Assign Rider */}
         <td className="px-4 py-3.5">
           <div className="flex items-center gap-2">
-            <div className="relative w-36">
+            <div className="relative w-40  truncate">
+              {console.log(orderData.status)}
               {orderData.status === "cancelled" ||
-              orderData.status === "rejected" ||
-              orderData.status === "delivered" ||
-              orderData.status === "out_for_delivery" ? (
+                orderData.status === "rejected" ||
+                orderData.status === "delivered" ||
+                orderData.status === "assigned" ||
+                orderData.status === "out_for_delivery" ? (
                 <h1
-                  className={`${selectClass} w-full !cursor-not-allowed bg-gray-50 text-gray-400 flex justify-center items-center`}
+                  className={`${selectClass} w-full !cursor-not-allowed bg-gray-50 text-gray-400 flex justify-center items-center !p-0`}
                 >
-                  {orderData.riderInfo?.name || "Unassigned"}
+                  {formatEMPID(orderData.riderInfo?._id)} - {orderData.riderInfo?.name || "Unassigned"}
                 </h1>
               ) : (
                 <select

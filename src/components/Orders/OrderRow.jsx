@@ -171,6 +171,7 @@ export default function OrderRow({ order, riders, isLast }) {
     orderData.riderInfo?._id || "",
   );
   const [isUpdating, setIsUpdating] = useState(false);
+  console.log(orderData);
 
   // Sync when parent refreshes data
   useEffect(() => {

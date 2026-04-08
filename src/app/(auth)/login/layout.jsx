@@ -1,18 +1,29 @@
-import "../../globals.css";
+"use client";
 
-export const metadata = {
-  title: "MrHalwai Admin Dashboard",
-  description: "Admin dashboard for MrHalwai",
-};
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import LoaderComponent from "@/components/Global/Loader";
+export default function LoginLayout({ children }) {
+  const [isLoggedIn, setIsLoggedIn] = useState(null);
+  const router = useRouter();
 
-export default function RootLayout({ children }) {
+  useEffect(() => {
+    const key = localStorage.getItem("admin-key");
+    const loggedIn = !!key;
+
+    setIsLoggedIn(loggedIn);
+
+    if (loggedIn) {
+      router.replace("/");
+    }
+  }, []);
+
+  // 🚫 Block entire layout (Navbar included)
+  if (!isLoggedIn === null) return <LoaderComponent />;
+  if (isLoggedIn) return null;
   return (
-    <html lang="en">
-      <body>
-        <div className="bg-slate-50 text-slate-900 ">
-          <div className="">{children}</div>
-        </div>
-      </body>
-    </html>
+    <div className="bg-slate-50 text-slate-900 ">
+      <div className="">{children}</div>
+    </div>
   );
 }

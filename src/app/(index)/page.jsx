@@ -5,19 +5,11 @@ import fetchDashboardData, { initialData } from "@/store/dashboardAPI";
 import { useEffect, useState } from "react";
 import Loader from "@/components/Global/Loader";
 import Socket from "@/components/Socket/socket";
-import { redirect } from "next/navigation";
 
 const Home = () => {
   const [data, setData] = useState(initialData);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      redirect("login");
-    }
-  }, [isLoggedIn]);
 
   const setLoadingFun = (data) => {
     setLoading(data);

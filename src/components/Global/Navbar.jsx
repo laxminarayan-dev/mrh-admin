@@ -463,7 +463,12 @@ const Navbar = () => {
                           key={link.id + lidx}
                           type="button"
                           onClick={() => {
-                            router.push(link.path);
+                            if (link.id === "logout") {
+                              localStorage.removeItem("admin-key");
+                              router.replace("/login");
+                            } else {
+                              router.replace(link.path);
+                            }
                             if (isMobileSidebarOpen)
                               setIsMobileSidebarOpen(false);
                           }}

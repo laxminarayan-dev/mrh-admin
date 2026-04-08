@@ -1,8 +1,25 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Loader, TriangleAlert } from "lucide-react";
+import { AlertTitle, AlertDescription, Alert } from "@/components/ui/alert";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
+  const router = useRouter();
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleAuth = () => {
+    console.log("this is called");
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      localStorage.setItem("admin-key", "ksho4ou98sodfg9");
+      router.replace("/");
+    }, 2000);
+  };
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-100">
       <div className="pointer-events-none absolute -left-20 top-0 h-80 w-80 rounded-full bg-emerald-300/45 blur-3xl" />
@@ -45,7 +62,7 @@ const Login = () => {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-200/70 bg-white/90 p-5 shadow-2xl shadow-slate-900/10 backdrop-blur-sm sm:p-8">
+        <section className="rounded-3xl border border-slate-200/70 bg-white/90 p-5 shadow-2xl shadow-slate-900/10 backdrop-blur-sm sm:p-8 w-xl mx-auto">
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Image
@@ -70,6 +87,15 @@ const Login = () => {
           </div>
 
           <form className="flex flex-col gap-4" action="">
+            {error && (
+              <Alert variant="destructive" className="border-red-300 bg-red-50">
+                <TriangleAlert className="h-4 w-4" />
+                <AlertTitle>Invalid email or password</AlertTitle>
+                <AlertDescription>
+                  The credentials you entered are incorrect. Please try again.
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="flex flex-col gap-2">
               <label
                 htmlFor="email"
@@ -112,9 +138,15 @@ const Login = () => {
 
             <button
               type="button"
-              className="mt-2 w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:ring-offset-2"
+              onClick={handleAuth}
+              disabled={loading}
+              className="flex justify-center items-center mt-2 w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:ring-offset-2"
             >
-              Log in to Dashboard
+              {loading ? (
+                <Loader className="animate-spin" />
+              ) : (
+                "Log in to Dashboard"
+              )}
             </button>
 
             <p className="pt-1 text-center text-sm text-slate-600">

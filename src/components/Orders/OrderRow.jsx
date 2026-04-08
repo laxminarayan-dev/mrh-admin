@@ -188,18 +188,32 @@ export default function OrderRow({ order, riders, isLast }) {
 
   // Called by StatusActions when an action button is clicked
   const handleStatusAction = async (nextStatus) => {
-    const riderInfo = riders.find((r) => r._id === selectedRider) || null;
+    let riderInfo = {};
+    if (nextStatus == "assigned") {
+      const rider = riders.find((r) => r._id === selectedRider) || null;
+      riderInfo = {
+        _id: rider?._id || undefined,
+        name: rider?.name || undefined,
+        phone: rider?.phone || undefined,
+        email: rider?.email || undefined,
+      };
+    } else {
+      riderInfo = orderData.riderInfo || {
+        _id: "",
+        name: "",
+        phone: "",
+        email: "",
+      };
+    }
     const updated = await updateOrder(
       {
         ...orderData,
         status: nextStatus,
-        riderInfo: {
-          _id: riderInfo?._id || undefined,
-          name: riderInfo?.name || undefined,
-          phone: riderInfo?.phone || undefined,
-          email: riderInfo?.email || undefined,
-        },
-        assignedAt: nextStatus === "assigned" ? new Date().toISOString() : null,
+        riderInfo: riderInfo,
+        assignedAt:
+          nextStatus === "assigned"
+            ? new Date().toISOString()
+            : orderData.assignedAt,
       },
       setIsUpdating,
     );

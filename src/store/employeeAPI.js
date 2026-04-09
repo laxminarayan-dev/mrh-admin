@@ -102,3 +102,38 @@ export const getRiders = async () => {
         throw error;
     }
 };
+
+export const handleAdminLogin = async ({ email, password }) => {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/employee/admin/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+        });
+
+        if (!response.ok) {
+            try {
+                const errorJson = await response.json();
+                return {
+                    ...errorJson,
+                    status: response.status,
+                };
+            } catch {
+                const errorText = await response.text();
+                return {
+                    message: errorText || 'Failed to Login Admin',
+                    status: response.status,
+                };
+            }
+        }
+        else {
+            const data = await response.json()
+            return data
+        }
+
+    } catch (error) {
+        return error
+    }
+}

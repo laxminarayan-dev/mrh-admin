@@ -5,19 +5,49 @@ import React, { useEffect, useState } from "react";
 import { Loader, TriangleAlert } from "lucide-react";
 import { AlertTitle, AlertDescription, Alert } from "@/components/ui/alert";
 import { useRouter } from "next/navigation";
+import { handleAdminLogin } from "@/store/employeeAPI";
 
 const Login = () => {
   const router = useRouter();
-  const [error, setError] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleAuth = () => {
-    console.log("this is called");
+  const handleAuth = async () => {
     setLoading(true);
+    if (email.trim() == "" || password.trim() == "") {
+      setLoading(false);
+      setError({
+        title: "Email & Password Required",
+        description: "Email and Password can not be empty!",
+      });
+    } else {
+      const response = await handleAdminLogin({ email, password });
+      if (response.status == 401) {
+        setError({
+          title: response.message,
+          description: "Given credentials are invalid!",
+        });
+      } else if (response.status == 404) {
+        setError({
+          title: response.message,
+          description: "No Admin account is regeistered with given Email!",
+        });
+      } else if (response.status == 500) {
+        setError({
+          title: response.message,
+          description:
+            "There is an Internal Server Error, Please try after some time or contact the support team!",
+        });
+      } else {
+        localStorage.setItem("admin-key", response.token);
+        router.replace("/");
+      }
+    }
     setTimeout(() => {
       setLoading(false);
-      localStorage.setItem("admin-key", "ksho4ou98sodfg9");
-      router.replace("/");
+      setError(null);
     }, 2000);
   };
   return (
@@ -90,10 +120,8 @@ const Login = () => {
             {error && (
               <Alert variant="destructive" className="border-red-300 bg-red-50">
                 <TriangleAlert className="h-4 w-4" />
-                <AlertTitle>Invalid email or password</AlertTitle>
-                <AlertDescription>
-                  The credentials you entered are incorrect. Please try again.
-                </AlertDescription>
+                <AlertTitle>{error.title}</AlertTitle>
+                <AlertDescription>{error.description}</AlertDescription>
               </Alert>
             )}
             <div className="flex flex-col gap-2">
@@ -107,6 +135,7 @@ const Login = () => {
                 id="email"
                 type="email"
                 name="email"
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="manager@mrhalwai.com"
                 className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200"
               />
@@ -131,6 +160,7 @@ const Login = () => {
                 id="password"
                 type="password"
                 name="password"
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200"
               />

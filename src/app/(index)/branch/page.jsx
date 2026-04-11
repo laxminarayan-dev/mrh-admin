@@ -8,6 +8,7 @@ import {
   RotateCcw,
   CircleCheck,
   CircleOff,
+  Trash2,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -18,9 +19,11 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { fetchShops, updateShop } from "@/store/shopAPI";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { deleteShop, fetchShops, updateShop } from "@/store/shopAPI";
 import { fetchFoodItems } from "../inventory/page";
 import Socket from "@/components/Socket/socket";
+import { useRouter } from "next/navigation";
 
 const getChanges = (original, updated) => {
   const changes = {};
@@ -28,7 +31,10 @@ const getChanges = (original, updated) => {
   for (const key of allKeys) {
     if (key !== "shopOpen" && key !== "menuItems") continue;
     if (key === "menuItems") {
-      if (original[key]?.length !== updated[key]?.length || !original[key]?.every(item => updated[key]?.includes(item))) {
+      if (
+        original[key]?.length !== updated[key]?.length ||
+        !original[key]?.every((item) => updated[key]?.includes(item))
+      ) {
         changes[key] = { from: original[key], to: updated[key] };
       }
     }
@@ -37,10 +43,9 @@ const getChanges = (original, updated) => {
     }
   }
   if (Object.keys(changes).length > 0) {
-    return true
-  }
-  else {
-    return false
+    return true;
+  } else {
+    return false;
   }
 };
 
@@ -53,8 +58,9 @@ const CreateNewBranchPage = () => {
   // const [isDirty,] = selectedBranch && selectedBranchCopy && getChanges(selectedBranchCopy, selectedBranch);
   const [isDirty, setIsDirty] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [deleteError, setDeleteError] = useState(null);
 
-
+  const router = useRouter();
 
   // socket connection status logging
   useEffect(() => {
@@ -66,16 +72,18 @@ const CreateNewBranchPage = () => {
     });
 
     Socket.on("shop-updated", () => {
-      fetchShops().then((data) => {
-        setSelectedBranchCopy(null);
-        setBranches(data);
-        const active = data.find((b) => b._id === selectedBranchId);
-        if (active) setSelectedBranch(active);
-      }).catch((err) => {
-        console.error("Error fetching shops after update:", err);
-        setBranches([]);
-      });
-    })
+      fetchShops()
+        .then((data) => {
+          setSelectedBranchCopy(null);
+          setBranches(data);
+          const active = data.find((b) => b._id === selectedBranchId);
+          if (active) setSelectedBranch(active);
+        })
+        .catch((err) => {
+          console.error("Error fetching shops after update:", err);
+          setBranches([]);
+        });
+    });
 
     Socket.on("item-updated", () => {
       fetchFoodItems(setItems).catch((err) => {
@@ -89,15 +97,17 @@ const CreateNewBranchPage = () => {
         console.error("Error fetching items after deletion:", err);
         setItems([]);
       });
-      fetchShops().then((data) => {
-        setSelectedBranchCopy(null);
-        setBranches(data);
-        const active = data.find((b) => b._id === selectedBranchId);
-        if (active) setSelectedBranch(active);
-      }).catch((err) => {
-        console.error("Error fetching shops after item deletion:", err);
-        setBranches([]);
-      });
+      fetchShops()
+        .then((data) => {
+          setSelectedBranchCopy(null);
+          setBranches(data);
+          const active = data.find((b) => b._id === selectedBranchId);
+          if (active) setSelectedBranch(active);
+        })
+        .catch((err) => {
+          console.error("Error fetching shops after item deletion:", err);
+          setBranches([]);
+        });
     });
 
     Socket.on("disconnect", () => {
@@ -106,7 +116,7 @@ const CreateNewBranchPage = () => {
     return () => {
       Socket.off("connect");
       Socket.off("disconnect");
-    }
+    };
   }, []);
 
   /* ---------------- INIT ---------------- */
@@ -117,10 +127,12 @@ const CreateNewBranchPage = () => {
   }, [selectedBranch]);
 
   useEffect(() => {
-    const isDirty = selectedBranch && selectedBranchCopy && getChanges(selectedBranchCopy, selectedBranch);
+    const isDirty =
+      selectedBranch &&
+      selectedBranchCopy &&
+      getChanges(selectedBranchCopy, selectedBranch);
     setIsDirty(isDirty);
   }, [selectedBranch, selectedBranchCopy]);
-
 
   useEffect(() => {
     const id = localStorage.getItem("mrh_active_shop_id");
@@ -188,6 +200,15 @@ const CreateNewBranchPage = () => {
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
+      {/* Delete Error Alert */}
+      {deleteError && (
+        <Alert variant="destructive" className={"bg-red-100"}>
+          <Trash2 size={16} />
+          <AlertTitle>Deletion Failed</AlertTitle>
+          <AlertDescription>{deleteError}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-center md:justify-between items-start md:items-end gap-4 md:gap-0">
         <div>
@@ -198,26 +219,48 @@ const CreateNewBranchPage = () => {
             Manage availability and configure your outlet menu.
           </p>
         </div>
-        {isDirty && (<div className="flex gap-4 justify-center items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => window.location.reload()}
-          >
-            <RotateCcw size={16} className="mr-2" />
-            Reset
-          </Button>
 
-          <Button
-            className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
-            onClick={() => {
-              updateShop(selectedBranch._id, { ...selectedBranch });
-            }}
-          >
-            <Save size={16} className="mr-2" />
-            Save Changes
-          </Button>
-        </div>)}
+        {isDirty && (
+          <div className="flex gap-4 justify-center items-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.location.reload()}
+            >
+              <RotateCcw size={16} className="mr-2" />
+              Reset
+            </Button>
+
+            <Button
+              className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
+              onClick={() => {
+                updateShop(selectedBranch._id, { ...selectedBranch });
+              }}
+            >
+              <Save size={16} className="mr-2" />
+              Save Changes
+            </Button>
+          </div>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-9 w-9 p-0 text-red-500 hover:bg-red-50 hover:text-red-600"
+          title="Delete Branch"
+          onClick={async () => {
+            let res = await deleteShop(selectedBranchId);
+            if (res.ok) {
+              window.location.href = "/";
+            } else {
+              setDeleteError(
+                res.message || "Failed to delete branch. Please try again.",
+              );
+              setTimeout(() => setDeleteError(null), 5000);
+            }
+          }}
+        >
+          <Trash2 size={18} />
+        </Button>
       </div>
 
       {/* Main Card */}
@@ -247,17 +290,19 @@ const CreateNewBranchPage = () => {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <div
-                className={`h-2.5 w-2.5 rounded-full ${selectedBranch?.shopOpen
-                  ? "bg-emerald-500 animate-pulse"
-                  : "bg-slate-400"
-                  }`}
+                className={`h-2.5 w-2.5 rounded-full ${
+                  selectedBranch?.shopOpen
+                    ? "bg-emerald-500 animate-pulse"
+                    : "bg-slate-400"
+                }`}
               />
 
               <span
-                className={`text-xs font-semibold ${selectedBranch?.shopOpen
-                  ? "text-emerald-600"
-                  : "text-slate-400"
-                  }`}
+                className={`text-xs font-semibold ${
+                  selectedBranch?.shopOpen
+                    ? "text-emerald-600"
+                    : "text-slate-400"
+                }`}
               >
                 {selectedBranch?.shopOpen ? "LIVE" : "OFFLINE"}
               </span>
@@ -313,7 +358,6 @@ const CreateNewBranchPage = () => {
             })}
           </div>
         </CardContent>
-
       </Card>
     </div>
   );

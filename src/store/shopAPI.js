@@ -41,3 +41,21 @@ export const updateShop = async (id, data) => {
         return { ok: false, message: "Failed to update shop" };
     }
 };
+
+export const deleteShop = async (id) => {
+    try {
+        const res = await fetch(`${BACKEND_URL}/api/shop/delete/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+        if (!res.ok) {
+            return { ok: false, message: json?.message || "Failed to delete shop" };
+        }
+        return { ok: true }
+    } catch (error) {
+        console.error("Error deleting shop:", error);
+        return { ok: false, message: "Failed to delete shop" };
+    }
+}

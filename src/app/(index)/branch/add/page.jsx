@@ -87,6 +87,7 @@ const CreateNewBranchPage = () => {
           setIsOpen(true);
           setAddress("");
           setCoords({ lat: "", lon: "" });
+          window.location.href = "/";
         } else {
           setShowSuccess(false);
           setShowError(true);

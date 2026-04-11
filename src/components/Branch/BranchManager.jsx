@@ -72,11 +72,11 @@ export default function BranchManager() {
       prev.map((b) =>
         b.id === branchId
           ? {
-            ...b,
-            menu: b.menu.map((m) =>
-              m.id === itemId ? { ...m, [flag]: !m[flag] } : m,
-            ),
-          }
+              ...b,
+              menu: b.menu.map((m) =>
+                m.id === itemId ? { ...m, [flag]: !m[flag] } : m,
+              ),
+            }
           : b,
       ),
     );
@@ -95,11 +95,11 @@ export default function BranchManager() {
       prev.map((b) =>
         b.id === branchId
           ? {
-            ...b,
-            menu: b.menu.map((m) =>
-              m.id === itemId ? { ...m, price: n } : m,
-            ),
-          }
+              ...b,
+              menu: b.menu.map((m) =>
+                m.id === itemId ? { ...m, price: n } : m,
+              ),
+            }
           : b,
       ),
     );

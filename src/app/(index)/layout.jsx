@@ -11,6 +11,10 @@ export default function DashboardLayout({ children }) {
 
   useEffect(() => {
     const key = localStorage.getItem("admin-key");
+    if (key == "undefined") {
+      router.replace("/login");
+    }
+    console.log(key);
     const loggedIn = !!key;
 
     setIsLoggedIn(loggedIn);

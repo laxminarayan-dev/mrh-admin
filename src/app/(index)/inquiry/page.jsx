@@ -118,7 +118,8 @@ export default function InquiryManagement() {
     try {
       setLoading(true);
       const token =
-        localStorage.getItem("adminToken") || localStorage.getItem("token");
+        localStorage.getItem("admin-key") || localStorage.getItem("token");
+      console.log(token);
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry`,
@@ -251,7 +252,7 @@ export default function InquiryManagement() {
 
     try {
       const token =
-        localStorage.getItem("adminToken") || localStorage.getItem("token");
+        localStorage.getItem("admin-key") || localStorage.getItem("token");
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry/${inquiryId}`,
@@ -275,7 +276,7 @@ export default function InquiryManagement() {
   const handleStatusChange = async (inquiryId, newStatus) => {
     try {
       const token =
-        localStorage.getItem("adminToken") || localStorage.getItem("token");
+        localStorage.getItem("admin-key") || localStorage.getItem("token");
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry/${inquiryId}/status`,
@@ -301,7 +302,7 @@ export default function InquiryManagement() {
   const handlePriorityChange = async (inquiryId, newPriority) => {
     try {
       const token =
-        localStorage.getItem("adminToken") || localStorage.getItem("token");
+        localStorage.getItem("admin-key") || localStorage.getItem("token");
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry/${inquiryId}/priority`,

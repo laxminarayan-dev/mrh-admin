@@ -9,12 +9,14 @@ export default function LoginLayout({ children }) {
 
   useEffect(() => {
     const key = localStorage.getItem("admin-key");
-    const loggedIn = !!key;
+    if (key != "undefined") {
+      const loggedIn = !!key;
 
-    setIsLoggedIn(loggedIn);
+      setIsLoggedIn(loggedIn);
 
-    if (loggedIn) {
-      router.replace("/");
+      if (loggedIn) {
+        router.replace("/");
+      }
     }
   }, []);
 

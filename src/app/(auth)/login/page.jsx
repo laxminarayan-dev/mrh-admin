@@ -41,7 +41,7 @@ const Login = () => {
             "There is an Internal Server Error, Please try after some time or contact the support team!",
         });
       } else {
-        localStorage.setItem("admin-key", response.token);
+        localStorage.setItem("admin-key", response?.token);
         router.replace("/");
       }
     }

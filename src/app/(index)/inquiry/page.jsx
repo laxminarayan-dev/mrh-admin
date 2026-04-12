@@ -119,7 +119,6 @@ export default function InquiryManagement() {
       setLoading(true);
       const token =
         localStorage.getItem("admin-key") || localStorage.getItem("token");
-      console.log(token);
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry`,

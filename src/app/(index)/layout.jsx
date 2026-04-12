@@ -14,7 +14,6 @@ export default function DashboardLayout({ children }) {
     if (key == "undefined") {
       router.replace("/login");
     }
-    console.log(key);
     const loggedIn = !!key;
 
     setIsLoggedIn(loggedIn);

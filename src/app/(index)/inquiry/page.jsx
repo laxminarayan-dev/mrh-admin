@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Cookies from "js-cookie";
 import {
   Mail,
   Search,
@@ -117,8 +118,7 @@ export default function InquiryManagement() {
   const fetchInquiries = useCallback(async () => {
     try {
       setLoading(true);
-      const token =
-        localStorage.getItem("admin-key") || localStorage.getItem("token");
+      const token = Cookies.get("token");
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry`,
@@ -211,8 +211,7 @@ export default function InquiryManagement() {
 
     try {
       setResponseLoading(true);
-      const token =
-        localStorage.getItem("admin-key") || localStorage.getItem("token");
+      const token = Cookies.get("token");
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry/${selectedInquiry._id}/respond`,
@@ -250,8 +249,7 @@ export default function InquiryManagement() {
       return;
 
     try {
-      const token =
-        localStorage.getItem("admin-key") || localStorage.getItem("token");
+      const token = Cookies.get("token");
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry/${inquiryId}`,
@@ -274,8 +272,7 @@ export default function InquiryManagement() {
   // Handle status change
   const handleStatusChange = async (inquiryId, newStatus) => {
     try {
-      const token =
-        localStorage.getItem("admin-key") || localStorage.getItem("token");
+      const token = Cookies.get("token");
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry/${inquiryId}/status`,
@@ -300,8 +297,7 @@ export default function InquiryManagement() {
   // Handle priority change
   const handlePriorityChange = async (inquiryId, newPriority) => {
     try {
-      const token =
-        localStorage.getItem("admin-key") || localStorage.getItem("token");
+      const token = Cookies.get("token");
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry/${inquiryId}/priority`,

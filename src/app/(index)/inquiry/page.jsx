@@ -120,13 +120,16 @@ export default function InquiryManagement() {
       const token =
         localStorage.getItem("adminToken") || localStorage.getItem("token");
 
-      const response = await fetch("/api/inquiry", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -212,7 +215,7 @@ export default function InquiryManagement() {
         localStorage.getItem("adminToken") || localStorage.getItem("token");
 
       const response = await fetch(
-        `/api/inquiry/${selectedInquiry._id}/respond`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry/${selectedInquiry._id}/respond`,
         {
           method: "PUT",
           headers: {
@@ -250,12 +253,15 @@ export default function InquiryManagement() {
       const token =
         localStorage.getItem("adminToken") || localStorage.getItem("token");
 
-      const response = await fetch(`/api/inquiry/${inquiryId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry/${inquiryId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (response.ok) {
         fetchInquiries();
@@ -271,14 +277,17 @@ export default function InquiryManagement() {
       const token =
         localStorage.getItem("adminToken") || localStorage.getItem("token");
 
-      const response = await fetch(`/api/inquiry/${inquiryId}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry/${inquiryId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: newStatus }),
         },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      );
 
       if (response.ok) {
         fetchInquiries();
@@ -294,14 +303,17 @@ export default function InquiryManagement() {
       const token =
         localStorage.getItem("adminToken") || localStorage.getItem("token");
 
-      const response = await fetch(`/api/inquiry/${inquiryId}/priority`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry/${inquiryId}/priority`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ priority: newPriority }),
         },
-        body: JSON.stringify({ priority: newPriority }),
-      });
+      );
 
       if (response.ok) {
         fetchInquiries();

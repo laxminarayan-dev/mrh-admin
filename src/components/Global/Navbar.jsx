@@ -13,6 +13,7 @@ import {
   Store,
   Check,
   Plus,
+  Mail,
 } from "lucide-react";
 import { fetchShops } from "@/store/shopAPI";
 import {
@@ -201,6 +202,7 @@ const Navbar = () => {
         },
         { id: "staff", label: "Staff", icon: UserRoundCog, path: "/staff" },
         { id: "branch", label: "Branch", icon: Store, path: "/branch" },
+        { id: "inquiry", label: "Inquiry", icon: Mail, path: "/inquiry" },
       ],
     },
     // {

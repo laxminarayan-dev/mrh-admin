@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Cookies from "js-cookie";
+import { io } from "socket.io-client";
 import {
   Mail,
   Search,
@@ -204,6 +205,54 @@ export default function InquiryManagement() {
   useEffect(() => {
     fetchInquiries();
   }, [fetchInquiries]);
+
+  // Socket listeners for real-time updates
+  useEffect(() => {
+    const SOCKET_URL =
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:8000";
+    const adminSocket = io(SOCKET_URL, {
+      path: "/mrh-backend/socket.io",
+      autoConnect: true,
+      transports: ["websocket", "polling"],
+      timeout: 20000,
+    });
+
+    // Listen for new inquiries
+    adminSocket.on("inquiry-new", (newInquiry) => {
+      console.log("📨 New inquiry received:", newInquiry);
+      setInquiries((prev) => [newInquiry, ...prev]);
+      calculateStats([newInquiry, ...inquiries]);
+    });
+
+    // Listen for inquiry updates (status, priority, responses)
+    adminSocket.on("inquiry-updated", (updatedInquiry) => {
+      console.log("🔄 Inquiry updated:", updatedInquiry);
+      setInquiries((prev) =>
+        prev.map((inq) =>
+          inq._id === updatedInquiry._id ? updatedInquiry : inq,
+        ),
+      );
+      calculateStats(
+        inquiries.map((inq) =>
+          inq._id === updatedInquiry._id ? updatedInquiry : inq,
+        ),
+      );
+    });
+
+    // Listen for inquiry deletion
+    adminSocket.on("inquiry-removed", (data) => {
+      console.log("🗑️ Inquiry removed:", data);
+      setInquiries((prev) => prev.filter((inq) => inq._id !== data.inquiryId));
+      calculateStats(inquiries.filter((inq) => inq._id !== data.inquiryId));
+    });
+
+    return () => {
+      adminSocket.off("inquiry-new");
+      adminSocket.off("inquiry-updated");
+      adminSocket.off("inquiry-removed");
+      adminSocket.disconnect();
+    };
+  }, [inquiries]);
 
   // Handle respond to inquiry
   const handleRespond = async () => {

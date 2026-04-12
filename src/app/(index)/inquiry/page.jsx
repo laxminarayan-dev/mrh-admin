@@ -212,7 +212,7 @@ export default function InquiryManagement() {
     try {
       setResponseLoading(true);
       const token =
-        localStorage.getItem("adminToken") || localStorage.getItem("token");
+        localStorage.getItem("admin-key") || localStorage.getItem("token");
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inquiry/${selectedInquiry._id}/respond`,

@@ -149,7 +149,8 @@ function StatusActions({ currentStatus, onAction, isUpdating, selectedRider }) {
             onClick={() => onAction(action.nextStatus)}
             className={`
                             transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed
-                            whitespace-nowrap shadow-sm
+                            inline-flex items-center gap-1.5 whitespace-nowrap shadow-sm
+                            rounded-lg px-2.5 py-1.5 text-[11px] font-semibold leading-none
                             ${action.style}
                         `}
           >
@@ -277,7 +278,7 @@ export default function OrderRow({ order, riders, isLast }) {
                   style={{ backgroundImage: chevronBg }}
                 >
                   <option value="" disabled>
-                    Assign Rider
+                    Select Rider
                   </option>
                   {riders.map((rider) => (
                     <option key={rider._id} value={rider._id}>

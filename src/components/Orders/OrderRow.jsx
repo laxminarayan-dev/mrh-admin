@@ -118,8 +118,6 @@ const selectClass =
 function StatusActions({ currentStatus, onAction, isUpdating, selectedRider }) {
   const machine = STATUS_MACHINE[currentStatus];
 
-  console.log("Machine:", machine, " for status: ", currentStatus);
-
   // Terminal states — nothing to do
   if (!machine || !machine.nextActions) {
     const isDelivered = currentStatus === "delivered";

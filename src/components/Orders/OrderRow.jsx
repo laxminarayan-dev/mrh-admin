@@ -118,14 +118,21 @@ const selectClass =
 function StatusActions({ currentStatus, onAction, isUpdating, selectedRider }) {
   const machine = STATUS_MACHINE[currentStatus];
 
+  console.log("Machine:", machine, " for status: ", currentStatus);
+
   // Terminal states — nothing to do
   if (!machine || !machine.nextActions) {
     const isDelivered = currentStatus === "delivered";
+    const isRejected = currentStatus === "rejected";
     return (
       <span
         className={`text-[12px] font-light px-2.5 py-1 rounded-full ${isDelivered ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
       >
-        {isDelivered ? "✓ Completed" : "✗ Rejected"}
+        {isDelivered
+          ? "✓ Completed"
+          : isRejected
+            ? "✗ Rejected"
+            : "✗ Cancelled"}
       </span>
     );
   }

@@ -148,7 +148,6 @@ function StatusActions({ currentStatus, onAction, isUpdating, selectedRider }) {
             disabled={isDisabled}
             onClick={() => onAction(action.nextStatus)}
             className={`
-                            inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[12px] font-light
                             transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed
                             whitespace-nowrap shadow-sm
                             ${action.style}
@@ -171,7 +170,6 @@ export default function OrderRow({ order, riders, isLast }) {
     orderData.riderInfo?._id || "",
   );
   const [isUpdating, setIsUpdating] = useState(false);
-  console.log(orderData);
 
   // Sync when parent refreshes data
   useEffect(() => {
@@ -254,7 +252,6 @@ export default function OrderRow({ order, riders, isLast }) {
         <td className="px-4 py-3.5">
           <div className="flex items-center gap-2">
             <div className="relative w-40  truncate">
-              {console.log(orderData.status)}
               {orderData.status === "cancelled" ||
               orderData.status === "rejected" ? (
                 <h1

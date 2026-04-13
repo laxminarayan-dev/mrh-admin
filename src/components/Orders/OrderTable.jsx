@@ -51,6 +51,12 @@ export const STATUS_CONFIG = {
   },
 };
 
+const normalizeStatus = (status = "") => status.replace(/-/g, "_");
+
+const FILTER_OPTIONS = Object.entries(STATUS_CONFIG).filter(
+  ([status]) => status === normalizeStatus(status),
+);
+
 // ─── Main Table ──────────────────────────────────────────────────────────────
 export default function OrdersTable({
   orders = [],
@@ -78,7 +84,9 @@ export default function OrdersTable({
   const filteredOrders =
     statusFilter === "all"
       ? selectedOrders
-      : selectedOrders.filter((o) => o.status === statusFilter);
+      : selectedOrders.filter(
+          (o) => normalizeStatus(o.status) === normalizeStatus(statusFilter),
+        );
 
   const chevronBg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`;
 
@@ -102,7 +110,7 @@ export default function OrdersTable({
             style={{ backgroundImage: chevronBg }}
           >
             <option value="all">All Orders</option>
-            {Object.entries(STATUS_CONFIG).map(([val, cfg]) => (
+            {FILTER_OPTIONS.map(([val, cfg]) => (
               <option key={val} value={val}>
                 {cfg.label}
               </option>

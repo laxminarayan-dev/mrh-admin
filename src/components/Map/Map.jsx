@@ -68,7 +68,7 @@ export async function getStreetName(lat, lon) {
 
 /* -------------------- MAIN COMPONENT -------------------- */
 
-function Map({ setCoords }) {
+function Map({ setCoords, coords }) {
   const watchIdRef = useRef(null);
 
   /* -------------------- CLICK HANDLER -------------------- */
@@ -126,6 +126,15 @@ function Map({ setCoords }) {
   const [userPos, setUserPos] = useState(null);
   const [mapLoading, setMapLoading] = useState(true);
 
+  /* Sync coords from parent inputs to userPos */
+  useEffect(() => {
+    if (coords?.lat && coords?.lon) {
+      const newPos = [parseFloat(coords.lat), parseFloat(coords.lon)];
+      setUserPos(newPos);
+      setMapCenter(newPos);
+    }
+  }, [coords?.lat, coords?.lon]);
+
   /* Icons */
   const shopIcon = ShopPin("#f97316", 28);
   const userIcon = UserPin("#2563eb", 32);
@@ -138,8 +147,6 @@ function Map({ setCoords }) {
       return;
     }
 
-    setGettingLocation?.(true);
-
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         if (pos.coords.accuracy < 300) {
@@ -149,12 +156,10 @@ function Map({ setCoords }) {
           setMapCenter(coords);
           setCoords?.({ lat: pos.coords.latitude, lon: pos.coords.longitude });
           navigator.geolocation.clearWatch(watchIdRef.current);
-          setGettingLocation?.(false);
         }
       },
       () => {
         alert("Enable GPS / High accuracy");
-        setGettingLocation?.(false);
       },
       {
         enableHighAccuracy: true,
@@ -242,12 +247,12 @@ function Map({ setCoords }) {
                 dragend: (e) => {
                   const marker = e.target;
                   const pos = marker.getLatLng();
-                  const coords = [pos.lat, pos.lng];
 
-                  setUserPos(coords);
-                  setMapCenter(coords);
+                  setUserPos([pos.lat, pos.lng]);
+                  setMapCenter([pos.lat, pos.lng]);
+                  setCoords?.({ lat: pos.lat, lon: pos.lng });
 
-                  console.log("Dragged to:", coords);
+                  console.log("Dragged to:", [pos.lat, pos.lng]);
                 },
               }}
             >

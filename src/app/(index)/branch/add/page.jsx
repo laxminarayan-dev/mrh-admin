@@ -48,6 +48,17 @@ const CreateNewBranchPage = () => {
     });
   }, [coords]);
 
+  /* Generate branch code from branch name */
+  useEffect(() => {
+    if (branchName.trim().length > 0) {
+      const first4Letters = branchName.substring(0, 4).toUpperCase();
+      const randomDigits = Math.floor(1000 + Math.random() * 9000).toString();
+      setBranchCode(first4Letters + randomDigits);
+    } else {
+      setBranchCode("");
+    }
+  }, [branchName]);
+
   /* -------------------- Submiting Data -------------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -138,30 +149,38 @@ const CreateNewBranchPage = () => {
         </CardHeader>
 
         <CardContent>
-          <form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          >
             <div className="space-y-2">
               <Label>Branch Name</Label>
               <Input
                 placeholder="Enter branch name"
                 onChange={(e) => setBranchName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
               />
             </div>
 
             <div className="space-y-2">
               <Label>Branch Code</Label>
               <Input
-                placeholder="Enter branch code"
-                onChange={(e) => setBranchCode(e.target.value)}
+                placeholder="Auto-generated code"
+                value={branchCode}
+                readOnly
+                disabled
+                onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
               />
             </div>
 
             <div className="flex-1 space-y-2">
-              <Label>Branch Code</Label>
+              <Label>Delivery Range</Label>
               <Input
                 type={"number"}
                 placeholder="Enter branch range"
                 value={branchRange}
                 onChange={(e) => setBranchRange(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
               />
             </div>
             <div className="flex items-center gap-3">
@@ -179,8 +198,35 @@ const CreateNewBranchPage = () => {
               </div>
             </div>
 
+            <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Longitute</Label>
+                <Input
+                  type={"number"}
+                  placeholder="Enter longitude"
+                  value={coords.lon}
+                  onChange={(e) =>
+                    setCoords((prev) => ({ ...prev, lon: e.target.value }))
+                  }
+                  onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Latitute</Label>
+                <Input
+                  type={"number"}
+                  placeholder="Enter latitude"
+                  value={coords.lat}
+                  onChange={(e) =>
+                    setCoords((prev) => ({ ...prev, lat: e.target.value }))
+                  }
+                  onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
+                />
+              </div>
+            </div>
+
             <div className="sm:col-span-2 mt-2 ">
-              <Map setCoords={setCoords} />
+              <Map setCoords={setCoords} coords={coords} />
               <Label className={"mt-4"}>Address</Label>
               <div className="flex gap-2 mt-2">
                 <Textarea
@@ -197,10 +243,10 @@ const CreateNewBranchPage = () => {
 
         <CardFooter>
           <div className="w-full flex gap-3">
-            <Button variant="outline" className="flex-1">
+            <Button variant="outline" className="flex-1" type="button">
               Cancel
             </Button>
-            <Button className="flex-1" onClick={handleSubmit}>
+            <Button className="flex-1" onClick={handleSubmit} type="button">
               Create Branch
             </Button>
           </div>

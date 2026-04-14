@@ -20,6 +20,16 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { deleteShop, fetchShops, updateShop } from "@/store/shopAPI";
 import { fetchFoodItems } from "../inventory/page";
 import Socket from "@/components/Socket/socket";
@@ -59,6 +69,7 @@ const CreateNewBranchPage = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [loading, setLoading] = useState(true);
   const [deleteError, setDeleteError] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const router = useRouter();
 
@@ -121,12 +132,25 @@ const CreateNewBranchPage = () => {
 
   /* ---------------- INIT ---------------- */
   useEffect(() => {
-    if (selectedBranch && selectedBranchCopy == null) {
+    if (
+      selectedBranch &&
+      (!selectedBranchCopy || selectedBranchCopy._id !== selectedBranch._id)
+    ) {
       setSelectedBranchCopy({ ...selectedBranch });
     }
-  }, [selectedBranch]);
+  }, [selectedBranch, selectedBranchCopy]);
 
   useEffect(() => {
+    if (!selectedBranch || !selectedBranchCopy) {
+      setIsDirty(false);
+      return;
+    }
+
+    if (selectedBranchCopy._id !== selectedBranch._id) {
+      setIsDirty(false);
+      return;
+    }
+
     const isDirty =
       selectedBranch &&
       selectedBranchCopy &&
@@ -155,7 +179,10 @@ const CreateNewBranchPage = () => {
         setSelectedBranchId(branches[0]._id);
       }
       const active = branches.find((b) => b._id === selectedBranchId);
-      if (active) setSelectedBranch(active);
+      if (active) {
+        setSelectedBranch(active);
+        setSelectedBranchCopy({ ...active });
+      }
     }
   }, [branches, selectedBranchId]);
 
@@ -233,8 +260,14 @@ const CreateNewBranchPage = () => {
 
             <Button
               className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
-              onClick={() => {
-                updateShop(selectedBranch._id, { ...selectedBranch });
+              onClick={async () => {
+                const res = await updateShop(selectedBranch._id, {
+                  ...selectedBranch,
+                });
+                if (res?.ok) {
+                  setSelectedBranchCopy({ ...selectedBranch });
+                  setIsDirty(false);
+                }
               }}
             >
               <Save size={16} className="mr-2" />
@@ -247,17 +280,7 @@ const CreateNewBranchPage = () => {
           size="sm"
           className="h-9 w-9 p-0 text-red-500 hover:bg-red-50 hover:text-red-600"
           title="Delete Branch"
-          onClick={async () => {
-            let res = await deleteShop(selectedBranchId);
-            if (res.ok) {
-              window.location.href = "/";
-            } else {
-              setDeleteError(
-                res.message || "Failed to delete branch. Please try again.",
-              );
-              setTimeout(() => setDeleteError(null), 5000);
-            }
-          }}
+          onClick={() => setShowDeleteConfirm(true)}
         >
           <Trash2 size={18} />
         </Button>
@@ -359,6 +382,40 @@ const CreateNewBranchPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Branch?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. You are about to permanently delete
+              the branch "{selectedBranch?.name}". All associated data will be
+              lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={async () => {
+                let res = await deleteShop(selectedBranchId);
+                if (res.ok) {
+                  window.location.href = "/";
+                } else {
+                  setShowDeleteConfirm(false);
+                  setDeleteError(
+                    res.message || "Failed to delete branch. Please try again.",
+                  );
+                  setTimeout(() => setDeleteError(null), 5000);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

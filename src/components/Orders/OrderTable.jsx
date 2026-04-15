@@ -188,16 +188,21 @@ export default function OrdersTable({
               </td>
             </tr>
           ) : (
-            filteredOrders.map((order, idx) => (
-              <OrderRow
-                key={order._id}
-                order={order}
-                riders={riders}
-                onStatusChange={onStatusChange}
-                onAssignRider={onAssignRider}
-                isLast={idx === filteredOrders.length - 1}
-              />
-            ))
+            (() => {
+              const sortedOrders = [...filteredOrders].sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+              );
+              return sortedOrders.map((order, idx) => (
+                <OrderRow
+                  key={order._id}
+                  order={order}
+                  riders={riders}
+                  onStatusChange={onStatusChange}
+                  onAssignRider={onAssignRider}
+                  isLast={idx === sortedOrders.length - 1}
+                />
+              ));
+            })()
           )}
         </tbody>
       </table>

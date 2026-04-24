@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   X,
@@ -123,8 +123,8 @@ const Navbar = () => {
     load();
   }, []);
 
-  // Hydration fix: mark component as mounted for client-side rendering
-  useEffect(() => {
+  // Hydration fix: mark component as mounted for client-side rendering (useLayoutEffect fires before paint, much faster)
+  useLayoutEffect(() => {
     setMounted(true);
   }, []);
 

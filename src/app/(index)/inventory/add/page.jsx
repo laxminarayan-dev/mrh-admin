@@ -462,7 +462,7 @@ const AddEditMenuItem = ({ initialData = null }) => {
           </Card>
 
           {/* Section 3: Availability & Images */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="hidden md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Schedule & Inventory</CardTitle>

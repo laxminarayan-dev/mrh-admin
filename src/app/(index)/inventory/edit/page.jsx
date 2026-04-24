@@ -162,7 +162,7 @@ const EditMenuItem = ({ initialData = null }) => {
 
           lowStockThreshold:
             data.lowStockThreshold !== undefined &&
-              data.lowStockThreshold !== null
+            data.lowStockThreshold !== null
               ? data.lowStockThreshold
               : 5,
 
@@ -259,12 +259,47 @@ const EditMenuItem = ({ initialData = null }) => {
 
     try {
       const form = new FormData();
+
+      // Map frontend field names to backend field names
+      const fieldMapping = {
+        onSale: "isSale",
+        specialItem: "isSpecial",
+        newArrival: "isNewArrival",
+        bestSeller: "isBestSeller",
+        available: "isAvailable",
+      };
+
       Object.entries(formData).forEach(([key, val]) => {
         if (val === undefined || val === null) return;
+
+        // Use mapped field name if it exists, otherwise use original key
+        const fieldName = fieldMapping[key] || key;
+
+        // Special handling for timings array -> availableTimings object
+        if (key === "availableTimings" || key === "timings") {
+          const timings = formData.availableTimings || formData.timings || [];
+          const timingObj = {
+            breakfast: timings.includes("Breakfast"),
+            lunch: timings.includes("Lunch"),
+            dinner: timings.includes("Dinner"),
+            allDay: timings.includes("All Day"),
+          };
+          form.append("availableTimings", JSON.stringify(timingObj));
+          return;
+        }
+
+        // Special handling for days array
+        if (key === "availableDays" || key === "days") {
+          const days = formData.availableDays || formData.days || [];
+          const mappedDays = days.map((d) => d.toLowerCase());
+          form.append("availableDays", JSON.stringify(mappedDays));
+          return;
+        }
+
         if (Array.isArray(val) || typeof val === "object") {
-          form.append(key, JSON.stringify(val));
+          form.append(fieldName, JSON.stringify(val));
         } else {
-          form.append(key, String(val));
+          form.append(fieldName, String(val));
         }
       });
 

@@ -47,6 +47,7 @@ const Navbar = () => {
   const [isLoadingShops, setIsLoadingShops] = useState(true);
   const [shops, setShops] = useState([]);
   const [activeShopId, setActiveShopIdState] = useState(null);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const branchMenuRef = useRef(null);
@@ -120,6 +121,11 @@ const Navbar = () => {
 
   useEffect(() => {
     load();
+  }, []);
+
+  // Hydration fix: mark component as mounted for client-side rendering
+  useEffect(() => {
+    setMounted(true);
   }, []);
 
   useEffect(() => {
@@ -457,9 +463,11 @@ const Navbar = () => {
                   <div className="space-y-1 px-2">
                     {section.links.map((link, lidx) => {
                       const Icon = link.icon;
-                      const isActive = link.matchPaths
-                        ? link.matchPaths.includes(pathname)
-                        : pathname === link.path;
+                      const isActive =
+                        mounted &&
+                        (link.matchPaths
+                          ? link.matchPaths.includes(pathname)
+                          : pathname === link.path);
                       return (
                         <button
                           key={link.id + lidx}

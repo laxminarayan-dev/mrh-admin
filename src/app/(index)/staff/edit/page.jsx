@@ -121,7 +121,8 @@ const EditEmployee = () => {
     }
     getEmployeeById(empId)
       .then((data) => {
-        setForm({ ...data, confirmPassword: data.password });
+        console.log(data);
+        setForm({ ...EMPTY, ...data, confirmPassword: data.password || "" });
       })
       .catch((err) => {
         alert("Failed to fetch employee data. Please try again.");

@@ -218,6 +218,11 @@ export default function OrderRow({ order, riders, isLast }) {
           nextStatus === "assigned"
             ? new Date().toISOString()
             : orderData.assignedAt,
+        paymentStatus:
+          nextStatus === "delivered"
+            ? "paid"
+            : orderData.paymentStatus || "unpaid",
+        deliveredAt: nextStatus === "delivered" ? new Date().toString() : null,
       },
       setIsUpdating,
     );
